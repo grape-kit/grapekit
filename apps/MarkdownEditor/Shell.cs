@@ -41,6 +41,7 @@ internal static class Shell
                 using var owp = Registry.CurrentUser.CreateSubKey($@"{Classes}\{e}\OpenWithProgids");
                 owp.SetValue(ProgId, Array.Empty<byte>(), RegistryValueKind.None);
             }
+            SetNewMenu();
             // Varsayılan uygulamalar sayfasında görünmek için yetenekler
             using (var cap = Registry.CurrentUser.CreateSubKey(@"Software\Grapekit\MarkdownEditor\Capabilities"))
             {
@@ -66,6 +67,7 @@ internal static class Shell
         try
         {
             SetExplorerMenu(false);
+            RemoveNewMenu();
             SetPreviewPane(false, remember: false);
             Registry.CurrentUser.DeleteSubKeyTree($@"{Classes}\{ProgId}", false);
             Registry.CurrentUser.DeleteSubKeyTree($@"{Classes}\Applications\{Path.GetFileName(Exe)}", false);
@@ -108,6 +110,43 @@ internal static class Shell
             c.SetValue("", $"\"{Exe}\" --to-pdf \"%1\"");
         }
         Notify();
+    }
+
+    // --- Gezgin / masaüstü sağ tık › Yeni › Markdown belgesi ---
+    // Gezgin bu girdiyi .md\ShellNew'den okur; menüde görünen ad ve simge .md'nin türünden (ProgId) gelir.
+    // .md'nin hiç türü yoksa (başka bir uygulama sahiplenmemişse) türü bu uygulama olur; varsa ona dokunulmaz.
+    // Yeni dosya boş açılır ve "Yeni Markdown belgesi.md" diye adlandırılır.
+    static void SetNewMenu()
+    {
+        using (var md = Registry.CurrentUser.CreateSubKey($@"{Classes}\.md"))
+        {
+            using var merged = Registry.ClassesRoot.OpenSubKey(".md");
+            if (string.IsNullOrEmpty(merged?.GetValue("") as string)) md.SetValue("", ProgId);
+        }
+        bool existed = Registry.CurrentUser.OpenSubKey($@"{Classes}\.md\ShellNew") is { } old && Dispose(old);
+        using (var k = Registry.CurrentUser.CreateSubKey($@"{Classes}\.md\ShellNew")) k.SetValue("NullFile", "");
+        if (!existed) ResetNewMenuCache();
+    }
+
+    static bool Dispose(RegistryKey k) { k.Dispose(); return true; }
+
+    static void RemoveNewMenu()
+    {
+        Registry.CurrentUser.DeleteSubKeyTree($@"{Classes}\.md\ShellNew", false);
+        using (var md = Registry.CurrentUser.OpenSubKey($@"{Classes}\.md", true))
+            if (string.Equals(md?.GetValue("") as string, ProgId, StringComparison.OrdinalIgnoreCase)) md!.DeleteValue("", false);
+        ResetNewMenuCache();
+    }
+
+    /// <summary>Gezgin "Yeni" listesini önbellekte tutar; silinince bir sonraki açılışta yeniden oluşturur.</summary>
+    static void ResetNewMenuCache()
+    {
+        try
+        {
+            using var k = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Explorer\Discardable\PostSetup\ShellNew", true);
+            k?.DeleteValue("Classes", false);
+        }
+        catch { }
     }
 
     // --- Dosya Gezgini önizleme bölmesi (PreviewServer: bu exe, -Embedding ile COM sunucusu) ---
