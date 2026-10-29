@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <RuntimeIdentifiers>win-x64;win-x86;win-arm64</RuntimeIdentifiers>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <ApplicationIcon>brand\app.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AssemblyName>MarkdownEditor</AssemblyName>
+    <RootNamespace>MarkdownEditor</RootNamespace>
+
+    <Product>Markdown Editörü</Product>
+    <AssemblyTitle>Markdown Editörü</AssemblyTitle>
+    <Version>1.0.0</Version>
+    <NoWarn>$(NoWarn);MSB3277</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\core\Grapekit.Core\Grapekit.Core.csproj" />
+    <Using Include="Grapekit" />
+    <Using Include="Grapekit.Ui" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="packaging\**;dist\**;web\**" />
+    <Compile Remove="packaging\**;dist\**;web\**" />
+    <!-- Arayüz (web\wwwroot) çıktının yanına wwwroot olarak kopyalanır -->
+    <Content Include="web\wwwroot\**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" Link="wwwroot\%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4314.35" />
+  </ItemGroup>
+
+  <!-- Arayüzü derle (npm). SkipWeb=true ile atlanır. -->
+  <Target Name="BuildWeb" BeforeTargets="BeforeBuild;AssignTargetPaths" Condition="'$(SkipWeb)' != 'true' And !Exists('web\wwwroot\app.js')">
+    <Exec Command="npm ci --no-audit --no-fund" WorkingDirectory="web" Condition="!Exists('web\node_modules')" />
+    <Exec Command="npm run build" WorkingDirectory="web" />
+    <ItemGroup>
+      <Content Include="web\wwwroot\**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" Link="wwwroot\%(RecursiveDir)%(Filename)%(Extension)" Exclude="@(Content)" />
+    </ItemGroup>
+  </Target>
+
+</Project>

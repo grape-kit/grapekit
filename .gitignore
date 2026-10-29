@@ -22,3 +22,4 @@ apps/CapsLock/yayinla.ps1
 tools/make-store-shots.mjs
 tools/site-content.mjs
 docs/
+apps/*/PRD.md

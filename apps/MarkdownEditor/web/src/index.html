@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob: https://*.grapekit.local https: http:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; script-src 'self'; connect-src 'self' https://*.grapekit.local; frame-src 'none'; object-src 'none'">
+<title>Markdown Editörü</title>
+<link rel="stylesheet" href="app.css">
+<link rel="stylesheet" href="preview.css">
+</head>
+<body>
+<div id="app">
+  <header class="titlebar">
+    <div class="tb-brand" aria-hidden="true"><img src="icon.png" alt="" width="20" height="20"></div>
+    <nav class="menubar" role="menubar" aria-label="Menü"></nav>
+    <div class="tabs" role="tablist" aria-label="Belgeler"></div>
+    <button class="tab-new" type="button" data-cmd="file.new" data-i18n-title="cmd.file.new"><svg viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg></button>
+    <div class="tb-drag"></div>
+    <div class="winctl">
+      <button type="button" data-win="min" data-i18n-title="win.min"><svg viewBox="0 0 10 10"><path d="M0 5h10"/></svg></button>
+      <button type="button" data-win="max" data-i18n-title="win.max"><svg viewBox="0 0 10 10"><rect x=".5" y=".5" width="9" height="9"/></svg></button>
+      <button type="button" data-win="close" class="close" data-i18n-title="win.close"><svg viewBox="0 0 10 10"><path d="M0 0l10 10M10 0L0 10"/></svg></button>
+    </div>
+  </header>
+  <div class="toolbar" role="toolbar" aria-label="Biçimlendirme"></div>
+  <main class="workspace">
+    <aside class="sidebar" aria-label="Kenar çubuğu">
+      <div class="side-tabs" role="tablist"></div>
+      <div class="side-body"></div>
+    </aside>
+    <div class="side-split" role="separator" aria-orientation="vertical"></div>
+    <section class="pane editor-pane" aria-label="Düzenleyici"><div class="editor"></div></section>
+    <div class="split" role="separator" aria-orientation="vertical" tabindex="0"></div>
+    <section class="pane preview-pane" aria-label="Önizleme"><article class="preview md" tabindex="0"></article></section>
+    <div class="welcome" hidden></div>
+  </main>
+  <footer class="statusbar"></footer>
+</div>
+<div class="layer" id="layer"></div>
+<script type="module" src="app.js"></script>
+</body>
+</html>
