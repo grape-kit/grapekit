@@ -1,0 +1,287 @@
+using System.Globalization;
+
+namespace CapsGosterge;
+
+/// <summary>Arayüz metinleri: 0 = Türkçe, 1 = English, 2 = Deutsch.</summary>
+internal static class L
+{
+    public static int Lang { get => GrapekitApp.Lang; set => GrapekitApp.Lang = value; }
+
+    public static int FromSystem() => CultureInfo.CurrentUICulture.TwoLetterISOLanguageName switch
+    {
+        "tr" => 0,
+        "de" => 2,
+        _ => 1,
+    };
+
+    static readonly CultureInfo[] Cultures = [new("tr-TR"), new("en-US"), new("de-DE")];
+    public static CultureInfo Culture => Cultures[Math.Clamp(Lang, 0, 2)];
+
+    public static string T(string key) => M.TryGetValue(key, out var v) ? v[Math.Clamp(Lang, 0, 2)] : key;
+
+    public static string[] List(string key) => T(key).Split('|');
+
+    public static string Seconds(int ms) =>
+        (ms / 1000.0).ToString(ms % 100 != 0 ? "0.00" : ms % 1000 == 0 ? "0" : "0.0", Culture) + " " + T("sec_unit");
+
+    static readonly Dictionary<string, string[]> M = new()
+    {
+        ["app"] = ["Caps Lock Göstergesi", "Caps Lock Indicator", "Feststelltasten-Anzeige"],
+        ["app_short"] = ["Caps Göstergesi", "Caps Indicator", "Caps-Anzeige"],
+        ["sec_unit"] = ["sn", "s", "s"],
+        ["state_on"] = ["AÇIK", "ON", "AN"],
+        ["state_off"] = ["kapalı", "off", "aus"],
+        ["caps_on_short"] = ["Büyük harf açık", "Caps Lock is on", "Feststelltaste an"],
+        ["caps_off_short"] = ["Küçük harf", "Lowercase", "Kleinbuchstaben"],
+        ["paused_short"] = ["Duraklatıldı", "Paused", "Pausiert"],
+
+        // ── Ekran kartları
+        ["osd_on"] = ["BÜYÜK HARF AÇILDI", "CAPS LOCK ON", "FESTSTELLTASTE AN"],
+        ["osd_off"] = ["Büyük harf kapandı", "Caps Lock off", "Feststelltaste aus"],
+        ["osd_on_sub"] = ["Şu an BÜYÜK harfle yazıyorsunuz", "You are typing in CAPITALS", "Sie schreiben in GROSSBUCHSTABEN"],
+        ["osd_off_sub"] = ["Şu an küçük harfle yazıyorsunuz", "You are typing in lowercase", "Sie schreiben in Kleinbuchstaben"],
+        ["num_on"] = ["NUM LOCK AÇIK", "NUM LOCK ON", "NUM-TASTE AN"],
+        ["num_off"] = ["Num Lock kapalı", "Num Lock off", "Num-Taste aus"],
+        ["num_on_sub"] = ["Sayı tuşları rakam yazar", "Number pad types digits", "Ziffernblock schreibt Zahlen"],
+        ["num_off_sub"] = ["Sayı tuşları ok tuşu gibi çalışır", "Number pad works as arrow keys", "Ziffernblock wirkt als Pfeiltasten"],
+        ["scroll_on"] = ["SCROLL LOCK AÇIK", "SCROLL LOCK ON", "ROLLEN AN"],
+        ["scroll_off"] = ["Scroll Lock kapalı", "Scroll Lock off", "Rollen aus"],
+        ["scroll_on_sub"] = ["Kaydırma kilidi etkin", "Scroll lock is active", "Rollen-Sperre aktiv"],
+        ["scroll_off_sub"] = ["Kaydırma kilidi kapalı", "Scroll lock is inactive", "Rollen-Sperre inaktiv"],
+        ["badge"] = ["BÜYÜK HARF AÇIK", "CAPS LOCK ON", "FESTSTELLTASTE AN"],
+        ["pw_warn_title"] = ["Dikkat: büyük harf açık", "Caps Lock is on", "Feststelltaste ist an"],
+        ["pw_warn_sub"] = ["Şifreniz yanlış girilebilir", "Your password may be wrong", "Ihr Passwort könnte falsch sein"],
+        ["hint_hold_title"] = ["Basılı tutun", "Hold the key", "Taste gedrückt halten"],
+        ["hint_hold_sub"] = ["Büyük harf için Caps Lock'u {0} basılı tutun", "Hold Caps Lock for {0} to turn it on", "Feststelltaste {0} halten zum Einschalten"],
+        ["hint_double_title"] = ["İki kez basın", "Press twice", "Zweimal drücken"],
+        ["hint_double_sub"] = ["Büyük harf için Caps Lock'a hızlıca iki kez basın", "Double-press Caps Lock to turn it on", "Zum Einschalten zweimal schnell drücken"],
+        ["paused_title"] = ["Bildirimler duraklatıldı", "Notifications paused", "Hinweise pausiert"],
+        ["paused_sub"] = ["Sürdürmek için {0}", "Press {0} to resume", "{0} zum Fortsetzen"],
+        ["resumed_title"] = ["Bildirimler açık", "Notifications on", "Hinweise aktiv"],
+        ["resumed_sub"] = ["Caps Lock göstergesi çalışıyor", "Caps Lock indicator is running", "Anzeige ist aktiv"],
+
+        // ── Sesli okuma
+        ["say_caps_on"] = ["Büyük harf", "Caps Lock on", "Großbuchstaben"],
+        ["say_caps_off"] = ["Küçük harf", "Caps Lock off", "Kleinbuchstaben"],
+        ["say_num_on"] = ["Num Lock açık", "Num Lock on", "Num-Taste an"],
+        ["say_num_off"] = ["Num Lock kapalı", "Num Lock off", "Num-Taste aus"],
+        ["say_scroll_on"] = ["Scroll Lock açık", "Scroll Lock on", "Rollen an"],
+        ["say_scroll_off"] = ["Scroll Lock kapalı", "Scroll Lock off", "Rollen aus"],
+        ["say_pw"] = ["Dikkat, büyük harf açık", "Careful, Caps Lock is on", "Achtung, Feststelltaste ist an"],
+
+        // ── Sekmeler
+        ["nav_general"] = ["Genel", "General", "Allgemein"],
+        ["nav_look"] = ["Görünüm", "Appearance", "Darstellung"],
+        ["nav_osd"] = ["Ekran bildirimi", "On-screen notice", "Bildschirmhinweis"],
+        ["nav_sound"] = ["Ses ve sesli okuma", "Sound & speech", "Ton & Sprache"],
+        ["nav_protect"] = ["Yanlış basma koruması", "Accidental press guard", "Fehldruck-Schutz"],
+        ["nav_password"] = ["Şifre uyarısı", "Password warning", "Passwortwarnung"],
+        ["nav_hotkey"] = ["Kısayol tuşu", "Shortcut key", "Tastenkürzel"],
+        ["nav_quiet"] = ["Sessiz saatler", "Quiet hours", "Ruhezeiten"],
+        ["nav_stats"] = ["İstatistikler", "Statistics", "Statistik"],
+        ["nav_about"] = ["Güncelleme ve hakkında", "Updates & about", "Updates & Info"],
+
+        // ── Genel
+        ["watch_head"] = ["İzlenecek tuşlar", "Keys to watch", "Überwachte Tasten"],
+        ["watch_caps"] = ["Caps Lock (büyük harf)", "Caps Lock", "Feststelltaste (Caps Lock)"],
+        ["watch_caps_desc"] = ["Büyük/küçük harf değişince bildir", "Notify when capitals turn on or off", "Bei Groß-/Kleinschreibung melden"],
+        ["watch_num"] = ["Num Lock (sayı kilidi)", "Num Lock", "Num-Taste"],
+        ["watch_num_desc"] = ["Sayı tuşları rakam / ok tuşu arasında değişince", "When the number pad switches digits/arrows", "Wenn der Ziffernblock umschaltet"],
+        ["watch_scroll"] = ["Scroll Lock (kaydırma kilidi)", "Scroll Lock", "Rollen-Taste"],
+        ["watch_scroll_desc"] = ["Nadiren kullanılır; Excel gibi programlarda etkili", "Rarely used; affects apps like Excel", "Selten genutzt; z. B. in Excel"],
+        ["pause_head"] = ["Duraklatma", "Pause", "Pause"],
+        ["not_paused"] = ["Bildirimler etkin", "Notifications are on", "Hinweise sind aktiv"],
+        ["paused_until"] = ["Duraklatıldı: {0} saatine kadar", "Paused until {0}", "Pausiert bis {0}"],
+        ["paused_forever"] = ["Duraklatıldı (siz sürdürene kadar)", "Paused until you resume", "Pausiert bis zur Fortsetzung"],
+        ["pause_desc"] = ["Duraklatınca kart, ses ve sesli okuma susar; koruma çalışmaya devam eder", "Cards, sounds and speech stop; the press guard keeps working", "Karten, Töne und Sprache ruhen; der Schutz bleibt aktiv"],
+        ["pause_15"] = ["15 dakika", "15 minutes", "15 Minuten"],
+        ["pause_60"] = ["1 saat", "1 hour", "1 Stunde"],
+        ["pause_inf"] = ["Ben açana kadar", "Until I resume", "Bis ich fortsetze"],
+        ["resume"] = ["Sürdür", "Resume", "Fortsetzen"],
+        ["start_head"] = ["Başlangıç ve performans", "Startup & performance", "Start & Leistung"],
+        ["auto"] = ["Bilgisayar açılınca başlat", "Start with Windows", "Mit Windows starten"],
+        ["auto_desc"] = ["Windows'a girişte arka planda kendiliğinden çalışır", "Runs in the background after you sign in", "Läuft nach der Anmeldung im Hintergrund"],
+        ["auto_blocked"] = ["Windows Ayarlar > Uygulamalar > Başlangıç bölümünden açın", "Turn it on in Windows Settings > Apps > Startup", "In Windows-Einstellungen > Apps > Autostart aktivieren"],
+        ["eco"] = ["Verimlilik modu (pil dostu)", "Efficiency mode (battery friendly)", "Effizienzmodus (akkuschonend)"],
+        ["eco_desc"] = ["Windows'tan düşük güçte çalıştırılmayı ister; yazma hızı etkilenmez", "Asks Windows to run it at low power; typing is not affected", "Läuft mit wenig Energie; Tippen bleibt unbeeinflusst"],
+
+        // ── Görünüm
+        ["theme"] = ["Tema", "Theme", "Design"],
+        ["theme_desc"] = ["\"Sistem\" Windows ayarını izler", "\"System\" follows Windows", "„System“ folgt Windows"],
+        ["theme_opts"] = ["Sistem|Açık|Koyu", "System|Light|Dark", "System|Hell|Dunkel"],
+        ["lang"] = ["Dil", "Language", "Sprache"],
+        ["lang_desc"] = ["Arayüz, kartlar ve sesli okuma", "Interface, cards and speech", "Oberfläche, Karten und Sprache"],
+        ["lang_opts"] = ["Türkçe|English|Deutsch", "Türkçe|English|Deutsch", "Türkçe|English|Deutsch"],
+        ["card_head"] = ["Bildirim kartı", "Notification card", "Hinweiskarte"],
+        ["prev_on"] = ["Büyük harf", "Caps on", "An"],
+        ["prev_off"] = ["Küçük harf", "Caps off", "Aus"],
+        ["try_now"] = ["Ekranda dene", "Try on screen", "Testen"],
+        ["color"] = ["Renk", "Color", "Farbe"],
+        ["color_desc"] = ["İlk seçenek Windows'un vurgu rengini kullanır; + ile istediğiniz rengi seçin", "The first option uses your Windows accent color; + picks any color", "Erste Option nutzt die Windows-Akzentfarbe; + wählt eine eigene Farbe"],
+        ["size"] = ["Boyut", "Size", "Größe"],
+        ["size_opts"] = ["Küçük|Orta|Büyük|Çok büyük", "Small|Medium|Large|Extra large", "Klein|Mittel|Groß|Sehr groß"],
+        ["opacity"] = ["Saydamlık", "Opacity", "Deckkraft"],
+        ["opacity_desc"] = ["%100 tamamen opak", "100% is fully opaque", "100 % ist voll deckend"],
+        ["badge_t"] = ["Kalıcı rozet", "Persistent badge", "Dauerhafte Anzeige"],
+        ["badge_t_desc"] = ["Büyük harf açık kaldıkça seçili konumda küçük bir rozet durur", "A small badge stays visible while Caps Lock is on", "Bleibt sichtbar, solange die Feststelltaste an ist"],
+
+        // ── Ekran bildirimi
+        ["osd_show"] = ["Değişince ekranda göster", "Show on screen when it changes", "Bei Änderung anzeigen"],
+        ["osd_show_desc"] = ["Tuşa basınca kısa bir bildirim kartı çıkar", "A short card appears when you press the key", "Beim Drücken erscheint eine kurze Karte"],
+        ["pos"] = ["Ekrandaki yeri", "Position on screen", "Position"],
+        ["pos_desc"] = ["Bir kutucuğa tıklayın,\nönizleme gösterilir", "Click a box to see\na preview", "Feld anklicken für\neine Vorschau"],
+        ["pos_names"] = [
+            "Sol üst|Üst orta|Sağ üst|Sol orta|Tam orta|Sağ orta|Sol alt|Alt orta|Sağ alt",
+            "Top left|Top center|Top right|Middle left|Center|Middle right|Bottom left|Bottom center|Bottom right",
+            "Oben links|Oben Mitte|Oben rechts|Mitte links|Mitte|Mitte rechts|Unten links|Unten Mitte|Unten rechts"],
+        ["selected"] = ["Seçili: {0}", "Selected: {0}", "Gewählt: {0}"],
+        ["dur"] = ["Ekranda kalma süresi", "Display time", "Anzeigedauer"],
+        ["dur_desc"] = ["Kart bu süre sonra kaybolur", "The card disappears after this time", "Danach verschwindet die Karte"],
+        ["try"] = ["Dene", "Try", "Testen"],
+        ["try_on"] = ["Büyük harf", "Caps on", "An"],
+        ["try_off"] = ["Küçük harf", "Caps off", "Aus"],
+
+        // ── Ses
+        ["sound"] = ["Sesli bildirim", "Sound notification", "Akustisches Signal"],
+        ["sound_desc"] = ["Açılınca yükselen, kapanınca alçalan ses — ekrana bakmadan anlarsınız", "Rising sound for on, falling for off — no need to look", "Steigend bei an, fallend bei aus – ohne hinzusehen"],
+        ["pack"] = ["Ses paketi", "Sound pack", "Klangpaket"],
+        ["pack_desc"] = ["Seçince örnek çalınır", "A sample plays when you pick one", "Beim Auswählen ertönt ein Beispiel"],
+        ["pack_opts"] = ["Yumuşak|Zil|Tık|Piyano|Mekanik klavye|Su damlası|Kendi sesim (.wav)",
+                         "Soft|Bell|Click|Piano|Mechanical keyboard|Water drop|My own (.wav)",
+                         "Sanft|Glocke|Klick|Klavier|Mechanische Tastatur|Wassertropfen|Eigener Ton (.wav)"],
+        ["vol"] = ["Ses düzeyi", "Volume", "Lautstärke"],
+        ["custom_on"] = ["Açılma sesi dosyası", "Sound for \"on\"", "Ton für „an“"],
+        ["custom_off"] = ["Kapanma sesi dosyası", "Sound for \"off\"", "Ton für „aus“"],
+        ["no_file"] = ["Dosya seçilmedi", "No file chosen", "Keine Datei gewählt"],
+        ["choose_file"] = ["Dosya seç…", "Choose file…", "Datei wählen…"],
+        ["listen"] = ["Dinle", "Listen", "Anhören"],
+        ["listen_on"] = ["▲  Açılma", "▲  On", "▲  An"],
+        ["listen_off"] = ["▼  Kapanma", "▼  Off", "▼  Aus"],
+        ["speak_head"] = ["Sesli okuma", "Speech", "Sprachausgabe"],
+        ["speak"] = ["Durumu sesli söyle", "Speak the state aloud", "Zustand ansagen"],
+        ["speak_desc"] = ["Windows sesiyle \"Büyük harf\" / \"Küçük harf\" der", "Windows voice says \"Caps Lock on\" / \"off\"", "Windows-Stimme sagt „Großbuchstaben“ / „Kleinbuchstaben“"],
+        ["rate"] = ["Konuşma hızı", "Speaking rate", "Sprechtempo"],
+        ["rate_opts"] = ["Yavaş|Normal|Hızlı", "Slow|Normal|Fast", "Langsam|Normal|Schnell"],
+        ["voice_ok"] = ["Kullanılan ses: {0}", "Voice: {0}", "Stimme: {0}"],
+        ["voice_missing"] = ["Bu dil için yüklü bir Windows sesi bulunamadı; varsayılan ses kullanılacak. Ayarlar > Saat ve dil > Konuşma bölümünden ses ekleyebilirsiniz.",
+                             "No Windows voice is installed for this language; the default voice will be used. Add one in Settings > Time & language > Speech.",
+                             "Keine Windows-Stimme für diese Sprache installiert; die Standardstimme wird genutzt. Unter Einstellungen > Zeit und Sprache > Spracheingabe hinzufügen."],
+
+        // ── Koruma
+        ["protect_intro"] = ["Yazarken Caps Lock'a yanlışlıkla basmak çok yaygındır. Koruma açıkken büyük harf yalnızca bilinçli bir hareketle açılır.",
+                             "Hitting Caps Lock by accident while typing is very common. With the guard on, capitals only turn on with a deliberate action.",
+                             "Versehentliches Drücken der Feststelltaste ist häufig. Mit Schutz schaltet sie nur bei bewusster Bedienung ein."],
+        ["protect_mode"] = ["Koruma türü", "Guard type", "Schutzart"],
+        ["protect_opts"] = ["Kapalı|Basılı tut|Çift bas", "Off|Hold|Double press", "Aus|Halten|2× drücken"],
+        ["hold"] = ["Basılı tutma süresi", "Hold time", "Haltedauer"],
+        ["hold_desc"] = ["Bu kadar basılı tutunca büyük harf açılır", "Caps turns on after holding this long", "So lange halten zum Einschalten"],
+        ["double"] = ["Çift basma aralığı", "Double-press window", "Doppeldruck-Zeitfenster"],
+        ["double_desc"] = ["İki basış arasındaki en uzun süre", "Longest time between the two presses", "Maximale Zeit zwischen zwei Drücken"],
+        ["single_off"] = ["Kapatmak için tek basış yeterli", "A single press turns it off", "Ausschalten mit einem Druck"],
+        ["single_off_desc"] = ["Koruma yalnızca açarken uygulanır", "The guard only applies when turning on", "Schutz gilt nur beim Einschalten"],
+        ["prot_hint"] = ["Engellenince ipucu göster", "Show a hint when blocked", "Hinweis bei Blockierung"],
+        ["prot_hint_desc"] = ["\"Basılı tutun\" gibi kısa bir kart çıkar", "Shows a short card like \"Hold the key\"", "Zeigt z. B. „Taste gedrückt halten“"],
+        ["protect_tip_off"] = ["Koruma kapalı: Caps Lock her zamanki gibi çalışır.", "Guard is off: Caps Lock works as usual.", "Schutz aus: Die Feststelltaste funktioniert wie gewohnt."],
+        ["protect_tip_hold"] = ["Deneyin: Caps Lock'a kısaca basın — hiçbir şey olmaz. Biraz basılı tutun — büyük harf açılır.",
+                                "Try it: tap Caps Lock — nothing happens. Hold it a moment — capitals turn on.",
+                                "Probieren Sie: kurz tippen – nichts passiert. Kurz halten – Großschreibung an."],
+        ["protect_tip_double"] = ["Deneyin: Caps Lock'a bir kez basın — hiçbir şey olmaz. Hızlıca iki kez basın — büyük harf açılır.",
+                                  "Try it: press Caps Lock once — nothing happens. Press twice quickly — capitals turn on.",
+                                  "Probieren Sie: einmal drücken – nichts passiert. Zweimal schnell – Großschreibung an."],
+
+        // ── Şifre uyarısı
+        ["pw_intro"] = ["Bir şifre alanına tıkladığınızda büyük harf açıksa, alanın hemen altında bir uyarı çıkar. Yanlış şifre girmenin en sık nedeni budur.",
+                        "When you click into a password field while Caps Lock is on, a warning appears right below the field — the most common cause of wrong passwords.",
+                        "Klicken Sie bei aktiver Feststelltaste in ein Passwortfeld, erscheint direkt darunter eine Warnung."],
+        ["pw"] = ["Şifre alanında uyar", "Warn in password fields", "In Passwortfeldern warnen"],
+        ["pw_desc"] = ["Tarayıcılarda ve Windows programlarında çalışır", "Works in browsers and Windows apps", "Funktioniert in Browsern und Windows-Apps"],
+        ["pw_sound"] = ["Uyarı sesi çal", "Play a warning sound", "Warnton abspielen"],
+        ["pw_sound_desc"] = ["Sessiz saatlerde çalmaz", "Silent during quiet hours", "Nicht während Ruhezeiten"],
+        ["pw_preview"] = ["Uyarıyı göster", "Show warning", "Warnung zeigen"],
+        ["pw_test_head"] = ["Burada deneyin", "Try it here", "Hier ausprobieren"],
+        ["pw_test_desc"] = ["Caps Lock'u açın ve aşağıdaki şifre kutusuna tıklayın.", "Turn on Caps Lock and click into the password box below.", "Feststelltaste einschalten und in das Feld unten klicken."],
+        ["pw_placeholder"] = ["Deneme şifre alanı", "Test password field", "Test-Passwortfeld"],
+        ["pw_privacy"] = ["Gizlilik: Program yazdıklarınızı asla okumaz ve kaydetmez; yalnızca odaklanılan alanın \"şifre alanı\" olup olmadığına bakar ve bunu sadece büyük harf açıkken yapar.",
+                          "Privacy: the app never reads or stores what you type. It only checks whether the focused field is a password field, and only while Caps Lock is on.",
+                          "Datenschutz: Eingaben werden nie gelesen oder gespeichert. Es wird nur geprüft, ob das Feld ein Passwortfeld ist – und nur bei aktiver Feststelltaste."],
+
+        // ── Kısayol
+        ["hotkey_intro"] = ["Bir tuş bileşimiyle tüm bildirimleri anında duraklatın veya sürdürün — örneğin sunum yaparken.",
+                            "Pause or resume all notifications instantly with a key combination — e.g. while presenting.",
+                            "Alle Hinweise per Tastenkombination sofort pausieren oder fortsetzen – z. B. bei Präsentationen."],
+        ["hotkey"] = ["Kısayol tuşunu kullan", "Use shortcut key", "Tastenkürzel verwenden"],
+        ["hotkey_desc"] = ["Duraklat / sürdür", "Pause / resume", "Pausieren / fortsetzen"],
+        ["hotkey_combo"] = ["Tuş bileşimi", "Key combination", "Tastenkombination"],
+        ["hotkey_combo_desc"] = ["Tıklayın ve yeni bileşime basın; silmek için Backspace", "Click, then press the new combination; Backspace clears", "Klicken, dann neue Kombination drücken; Rücktaste löscht"],
+        ["hotkey_prompt"] = ["Tuşlara basın…", "Press keys…", "Tasten drücken…"],
+        ["hotkey_ok"] = ["{0} kısayolu hazır.", "{0} is ready.", "{0} ist bereit."],
+        ["hotkey_fail"] = ["Bu kısayol başka bir program tarafından kullanılıyor. Lütfen başka bir bileşim seçin.", "This shortcut is used by another app. Please choose another combination.", "Dieses Kürzel wird von einem anderen Programm genutzt. Bitte eine andere Kombination wählen."],
+
+        // ── Sessiz saatler
+        ["quiet_intro"] = ["Belirlediğiniz saatlerde ses ve sesli okuma (isterseniz kartlar da) susar. Gece yarısını aşan aralıklar desteklenir.",
+                           "During the hours you set, sounds and speech (and optionally cards) are muted. Ranges past midnight are supported.",
+                           "In den festgelegten Zeiten sind Töne und Sprache (optional auch Karten) stumm. Zeiträume über Mitternacht werden unterstützt."],
+        ["quiet"] = ["Sessiz saatleri kullan", "Use quiet hours", "Ruhezeiten verwenden"],
+        ["quiet_desc"] = ["Örneğin gece 22:00 – sabah 08:00", "For example 22:00 – 08:00", "Zum Beispiel 22:00 – 08:00"],
+        ["quiet_start"] = ["Başlangıç", "Start", "Beginn"],
+        ["quiet_end"] = ["Bitiş", "End", "Ende"],
+        ["quiet_mode"] = ["Ne sussun?", "What is muted?", "Was wird stumm?"],
+        ["quiet_opts"] = ["Yalnızca sesler|Tüm bildirimler", "Sounds only|All notifications", "Nur Töne|Alle Hinweise"],
+        ["quiet_now"] = ["● Şu an sessiz saatlerdesiniz", "● Quiet hours are active now", "● Ruhezeit ist jetzt aktiv"],
+        ["quiet_not_now"] = ["Şu an sessiz saatlerde değilsiniz", "Quiet hours are not active now", "Ruhezeit ist gerade nicht aktiv"],
+        ["quiet_fs"] = ["Tam ekranda sessiz ol", "Quiet in full screen", "Im Vollbild stumm"],
+        ["quiet_fs_desc"] = ["Oyun, video veya sunum tam ekrandayken aynı kural uygulanır", "Same rule while a game, video or presentation is full screen", "Gleiche Regel bei Spielen, Videos oder Präsentationen im Vollbild"],
+
+        // ── İstatistik
+        ["stats"] = ["İstatistik tut", "Keep statistics", "Statistik führen"],
+        ["stats_desc"] = ["Yalnızca bu bilgisayarda saklanır", "Stored only on this PC", "Nur auf diesem PC gespeichert"],
+        ["today"] = ["Bugün", "Today", "Heute"],
+        ["st_caps"] = ["Büyük harf açma", "Caps Lock turned on", "Feststelltaste an"],
+        ["st_accidental"] = ["Yanlışlıkla basma (3 sn içinde kapatılan)", "Accidental (turned off within 3 s)", "Versehentlich (in 3 s wieder aus)"],
+        ["st_blocked"] = ["Koruma ile engellenen", "Blocked by the guard", "Vom Schutz blockiert"],
+        ["st_password"] = ["Şifre alanı uyarısı", "Password field warnings", "Passwortwarnungen"],
+        ["last14"] = ["Son 14 gün", "Last 14 days", "Letzte 14 Tage"],
+        ["week_summary"] = ["Son 7 günde büyük harf {0} kez açıldı; bunların {1} tanesi yanlışlıkla olabilir.", "In the last 7 days Caps Lock was turned on {0} times; {1} of them were probably accidental.", "In den letzten 7 Tagen {0}-mal eingeschaltet; davon vermutlich {1}-mal versehentlich."],
+        ["stats_privacy"] = ["Hangi tuşlara bastığınız asla kaydedilmez; yalnızca kilit tuşu sayıları tutulur ve 60 gün sonra silinir.", "Your keystrokes are never recorded; only lock-key counts are kept, and deleted after 60 days.", "Tastenanschläge werden nie gespeichert; nur Zähler der Sperrtasten, gelöscht nach 60 Tagen."],
+        ["stats_reset"] = ["İstatistikleri sıfırla", "Reset statistics", "Statistik zurücksetzen"],
+        ["stats_reset_q"] = ["Tüm istatistikler silinsin mi?", "Delete all statistics?", "Gesamte Statistik löschen?"],
+
+        // ── Hakkında / güncelleme
+        ["version"] = ["Sürüm {0}", "Version {0}", "Version {0}"],
+        ["update_head"] = ["Güncellemeler", "Updates", "Updates"],
+        ["update_store"] = ["Bu sürüm Microsoft Store'dan kuruldu; güncellemeler Store üzerinden otomatik gelir.", "This copy was installed from the Microsoft Store; updates arrive automatically through the Store.", "Aus dem Microsoft Store installiert; Updates kommen automatisch über den Store."],
+        ["update_unavailable"] = ["Bu sürümde otomatik güncelleme kullanılamıyor.", "Automatic updates are not available in this build.", "Automatische Updates sind in dieser Version nicht verfügbar."],
+        ["auto_update"] = ["Güncellemeleri otomatik denetle", "Check for updates automatically", "Automatisch nach Updates suchen"],
+        ["auto_update_desc"] = ["Günde en fazla bir kez, küçük bir dosya indirilir", "At most once a day, a tiny file is downloaded", "Höchstens einmal täglich, sehr kleine Datei"],
+        ["update_status"] = ["Durum", "Status", "Status"],
+        ["update_check"] = ["Şimdi denetle", "Check now", "Jetzt suchen"],
+        ["update_install"] = ["İndir ve kur (v{0})", "Download and install (v{0})", "Herunterladen und installieren (v{0})"],
+        ["upd_checking"] = ["Denetleniyor…", "Checking…", "Suche läuft…"],
+        ["upd_latest"] = ["En güncel sürümü kullanıyorsunuz", "You have the latest version", "Sie haben die neueste Version"],
+        ["upd_available"] = ["Yeni sürüm hazır: v{0}", "New version available: v{0}", "Neue Version verfügbar: v{0}"],
+        ["upd_error"] = ["Denetlenemedi (internet bağlantısını kontrol edin).", "Could not check (check your internet connection).", "Prüfung fehlgeschlagen (Internetverbindung prüfen)."],
+        ["upd_downloading"] = ["İndiriliyor… %{0}", "Downloading… {0}%", "Wird geladen… {0} %"],
+        ["upd_never"] = ["Henüz denetlenmedi", "Not checked yet", "Noch nicht geprüft"],
+        ["upd_last"] = ["Son denetim: {0}", "Last checked: {0}", "Zuletzt geprüft: {0}"],
+        ["balloon_update_title"] = ["Güncelleme mevcut", "Update available", "Update verfügbar"],
+        ["balloon_update_text"] = ["Caps Lock Göstergesi v{0} hazır. Kurmak için tıklayın.", "Caps Lock Indicator v{0} is ready. Click to install.", "Version {0} ist bereit. Zum Installieren klicken."],
+        ["other_head"] = ["Diğer", "More", "Weiteres"],
+        ["privacy"] = ["Gizlilik", "Privacy", "Datenschutz"],
+        ["website"] = ["Web sitesi", "Website", "Website"],
+        ["open_folder"] = ["Ayar klasörü", "Settings folder", "Einstellungsordner"],
+        ["reset_all"] = ["Tüm ayarları sıfırla", "Reset all settings", "Alle Einstellungen zurücksetzen"],
+        ["reset"] = ["Sıfırla", "Reset", "Zurücksetzen"],
+        ["reset_q"] = ["Tüm ayarlar varsayılana dönsün mü?", "Restore all settings to defaults?", "Alle Einstellungen auf Standard zurücksetzen?"],
+
+        // ── Tepsi menüsü
+        ["tray_on"] = ["Caps Lock: AÇIK – BÜYÜK HARF", "Caps Lock: ON – CAPITALS", "Feststelltaste: AN"],
+        ["tray_off"] = ["Caps Lock: kapalı – küçük harf", "Caps Lock: off – lowercase", "Feststelltaste: aus"],
+        ["menu_settings"] = ["Ayarlar…", "Settings…", "Einstellungen…"],
+        ["menu_osd"] = ["Ekranda göster", "Show on screen", "Am Bildschirm anzeigen"],
+        ["menu_sound"] = ["Sesli bildirim", "Sound", "Ton"],
+        ["menu_speak"] = ["Sesli okuma", "Speech", "Sprachausgabe"],
+        ["menu_protect"] = ["Yanlış basma koruması", "Accidental press guard", "Fehldruck-Schutz"],
+        ["menu_pause"] = ["Duraklat", "Pause", "Pausieren"],
+        ["menu_exit"] = ["Çıkış", "Exit", "Beenden"],
+    };
+}

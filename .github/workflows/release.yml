@@ -1,0 +1,84 @@
+# Bir uygulama için sürüm etiketi itildiğinde (ör. caps-lock-v1.1.0):
+# derler → kurulum dosyalarını üretir → GitHub Release oluşturur → updates/<uygulama>.json'u günceller.
+name: Yayın
+
+on:
+  push:
+    tags: ['*-v*']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Inno Setup
+        run: choco install innosetup --no-progress -y
+
+      - name: Etiketi çöz
+        id: tag
+        shell: pwsh
+        run: |
+          $t = "${{ github.ref_name }}"
+          if ($t -notmatch '^(?<id>[a-z0-9-]+)-v(?<ver>\d+\.\d+\.\d+)$') { throw "Etiket biçimi şöyle olmalı: <uygulama>-v1.2.3" }
+          "id=$($Matches.id)" >> $env:GITHUB_OUTPUT
+          "ver=$($Matches.ver)" >> $env:GITHUB_OUTPUT
+
+      - name: Derle ve paketle
+        shell: pwsh
+        run: ./tools/build-app.ps1 -App "${{ steps.tag.outputs.id }}" -Version "${{ steps.tag.outputs.ver }}" -Tag "${{ github.ref_name }}"
+
+      - name: GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $id = "${{ steps.tag.outputs.id }}"; $ver = "${{ steps.tag.outputs.ver }}"
+          $u = Get-Content "dist/$id/update.json" -Raw -Encoding UTF8 | ConvertFrom-Json
+          $app = Get-ChildItem apps -Directory | Where-Object { (Test-Path "$($_.FullName)/app.json") -and ((Get-Content "$($_.FullName)/app.json" -Raw -Encoding UTF8 | ConvertFrom-Json).id -eq $id) } | Select-Object -First 1
+          $meta = Get-Content "$($app.FullName)/app.json" -Raw -Encoding UTF8 | ConvertFrom-Json
+          $body = @"
+          ## $($meta.name.en) $ver
+
+          $($u.notes.en)
+
+          **Türkçe:** $($u.notes.tr)
+
+          | | |
+          |---|---|
+          | Windows 10 / 11, x64 | ``$($meta.exe)-Setup-$ver-x64.exe`` |
+          | Windows 11 ARM | ``$($meta.exe)-Setup-$ver-arm64.exe`` |
+          | 32-bit Windows | ``$($meta.exe)-Setup-$ver-x86.exe`` |
+
+          🍇 https://grapekit.com · ☕ https://buymeacoffee.com/grapekit
+          "@
+          $body | Out-File -Encoding utf8 notes.md
+          $files = Get-ChildItem "dist/$id" -Filter *.exe | ForEach-Object { $_.FullName }
+          gh release create "${{ github.ref_name }}" $files --title "$($meta.name.en) $ver" --notes-file notes.md
+
+      - name: Güncelleme bilgisini yayınla
+        shell: pwsh
+        run: |
+          $id = "${{ steps.tag.outputs.id }}"
+          git config user.name "grapekit-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git checkout main
+          New-Item -ItemType Directory -Force updates | Out-Null
+          Copy-Item "dist/$id/update.json" "updates/$id.json" -Force
+          git add "updates/$id.json"
+          git commit -m "$id: güncelleme bilgisi ${{ steps.tag.outputs.ver }}"
+          git push origin main

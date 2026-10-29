@@ -1,0 +1,27 @@
+<Project>
+  <!-- Depodaki tüm projeler için ortak ayarlar -->
+  <PropertyGroup>
+    <!-- Windows 10 1809 (17763) ve sonrası, Windows 11 dahil; x64, x86 ve ARM64 -->
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+
+    <Company>Grapekit</Company>
+    <Authors>Grapekit</Authors>
+    <Copyright>© 2026 Grapekit</Copyright>
+    <RepositoryUrl>https://github.com/grape-kit/grapekit</RepositoryUrl>
+    <PackageProjectUrl>https://grapekit.com</PackageProjectUrl>
+
+    <!-- Arka planda az bellek / az iş parçacığı -->
+    <ServerGarbageCollection>false</ServerGarbageCollection>
+    <ConcurrentGarbageCollection>false</ConcurrentGarbageCollection>
+    <UseSystemResourceKeys>true</UseSystemResourceKeys>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <Deterministic>true</Deterministic>
+
+    <NoWarn>$(NoWarn);SYSLIB1054;CA1416;WFO1000;WFO5001</NoWarn>
+  </PropertyGroup>
+</Project>

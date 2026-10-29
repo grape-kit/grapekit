@@ -1,0 +1,8 @@
+bin/
+obj/
+dist/
+*.user
+.vs/
+tools/node_modules/
+tools/*preview*.png
+apps/*/packaging/ekran-goruntuleri/

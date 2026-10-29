@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Tüm Grapekit uygulamalarının ortak çekirdeği: marka, tema, kontroller, güncelleme, standart menü -->
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Grapekit</RootNamespace>
+    <AssemblyName>Grapekit.Core</AssemblyName>
+  </PropertyGroup>
+
+</Project>

@@ -1,0 +1,12 @@
+{
+  "id": "caps-lock",
+  "exe": "CapsGosterge",
+  "project": "CapsLock.csproj",
+  "name": { "tr": "Caps Lock Göstergesi", "en": "Caps Lock Indicator", "de": "Feststelltasten-Anzeige" },
+  "slug": { "tr": "caps-lock-gostergesi", "en": "caps-lock-indicator" },
+  "guid": "6E4C2B7A-3F1D-4C8B-9A5E-CA95C0DE1001",
+  "mutex": "CapsGosterge.Tekil",
+  "accent": "#7C3AED",
+  "glyph": "arrow-big-up-dash",
+  "archs": ["x64", "arm64", "x86"]
+}
