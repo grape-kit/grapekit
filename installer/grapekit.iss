@@ -108,8 +108,9 @@ Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: 
 
 [Run]
 ; Sessiz güncellemeden sonra programı arka planda yeniden başlat
-Filename: "{app}\{#AppExe}.exe"; Parameters: "--autostart"; Flags: nowait skipifnotsilent
-Filename: "{app}\{#AppExe}.exe"; Description: "{cm:LaunchApp}"; Flags: nowait postinstall skipifsilent
+; runasoriginaluser: kurulum yönetici izniyle çalışsa da program normal kullanıcı olarak başlar
+Filename: "{app}\{#AppExe}.exe"; Parameters: "--autostart"; Flags: nowait skipifnotsilent runasoriginaluser
+Filename: "{app}\{#AppExe}.exe"; Description: "{cm:LaunchApp}"; Flags: nowait postinstall skipifsilent runasoriginaluser
 
 [UninstallRun]
 Filename: "{sys}\taskkill.exe"; Parameters: "/F /IM {#AppExe}.exe"; Flags: runhidden; RunOnceId: "StopApp"

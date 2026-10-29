@@ -2,11 +2,29 @@
   "id": "keep-awake",
   "exe": "KeepAwake",
   "project": "KeepAwake.csproj",
-  "name": { "tr": "Uyku Engelleyici", "en": "Keep Awake", "de": "Keep Awake" },
-  "slug": { "tr": "uyku-engelleyici", "en": "keep-awake" },
+  "name": {
+    "tr": "Uyku Engelleyici",
+    "en": "Keep Awake",
+    "de": "Keep Awake"
+  },
+  "slug": {
+    "tr": "uyku-engelleyici",
+    "en": "keep-awake"
+  },
   "guid": "B3F1A8D2-6C4E-4E7A-9D21-6A7E0C0FFEE1",
   "mutex": "KeepAwake.Tekil",
   "accent": "#7C3AED",
   "glyph": "coffee",
-  "archs": ["x64", "arm64", "x86"]
+  "archs": [
+    "x64",
+    "arm64",
+    "x86"
+  ],
+  "store": {
+    "identity": "DOLDUR.UykuEngelleyici",
+    "publisher": "CN=33217EBC-D94A-4090-8D30-C335AD1E238B",
+    "publisherName": "EC Studio",
+    "displayName": "Uyku Engelleyici",
+    "description": "Bilgisayarı ve ekranı uyanık tutar / Keeps your PC and screen awake"
+  }
 }

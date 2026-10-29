@@ -74,12 +74,14 @@ public static class Updater
         {
             var buf = new byte[81920];
             long done = 0;
-            int read;
+            int read, last = -1;
             while ((read = await src.ReadAsync(buf)) > 0)
             {
                 await dst.WriteAsync(buf.AsMemory(0, read));
                 done += read;
-                if (total > 0) progress?.Report((int)(done * 100 / total));
+                // Yalnızca yüzde değişince bildir: arayüz her 80 KB'ta yeniden çizilmesin
+                int pct = total > 0 ? (int)(done * 100 / total) : -1;
+                if (pct != last && pct >= 0) { last = pct; progress?.Report(pct); }
             }
         }
 

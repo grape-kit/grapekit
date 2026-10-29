@@ -142,7 +142,10 @@ public sealed class UpdateManager : IDisposable
 
     public Updater.Info? Available { get; private set; }
     public bool Busy { get; private set; }
+    /// <summary>Durum değişti (denetim başladı/bitti, yeni sürüm bulundu): düğmeler yeniden kurulmalı.</summary>
     public event Action? Changed;
+    /// <summary>Yalnızca durum yazısı değişti (indirme yüzdesi): yazıyı yeniden çizmek yeterli.</summary>
+    public event Action? Progress;
     /// <summary>Otomatik denetimde yeni sürüm bulundu (uygulama bildirim gösterir).</summary>
     public event Action<Updater.Info>? Found;
 
@@ -200,7 +203,7 @@ public sealed class UpdateManager : IDisposable
         Set(string.Format(CoreText.T("upd_downloading"), 0), true);
         try
         {
-            var progress = new Progress<int>(p => Set(string.Format(CoreText.T("upd_downloading"), p), true));
+            var progress = new Progress<int>(p => { _status = string.Format(CoreText.T("upd_downloading"), p); Progress?.Invoke(); });
             var path = await Updater.DownloadAsync(info, progress);
             Updater.RunInstaller(path);
             Application.Exit();

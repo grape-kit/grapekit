@@ -40,7 +40,7 @@ public abstract class SettingsWindow : Form
         DoubleBuffered = true;
         Text = GrapekitApp.Name;
         Icon = AppIcon.Get(32);
-        if (updates != null) updates.Changed += OnUpdatesChanged;
+        if (updates != null) { updates.Changed += OnUpdatesChanged; updates.Progress += OnUpdateProgress; }
     }
 
     protected override CreateParams CreateParams
@@ -136,6 +136,11 @@ public abstract class SettingsWindow : Form
         _page.AutoScrollPosition = new Point(-pos.X, -pos.Y);
     }
 
+    void OnUpdateProgress()
+    {
+        if (!IsDisposed && Tab == AboutTab) _page?.Invalidate();
+    }
+
     void OnUpdatesChanged()
     {
         if (IsDisposed || !IsHandleCreated) return;
@@ -219,7 +224,7 @@ public abstract class SettingsWindow : Form
     {
         if (disposing)
         {
-            if (Updates != null) Updates.Changed -= OnUpdatesChanged;
+            if (Updates != null) { Updates.Changed -= OnUpdatesChanged; Updates.Progress -= OnUpdateProgress; }
             F.Dispose();
             foreach (var f in new[] { _fName, _fVer, _fHero, _fHeroSub }) f?.Dispose();
         }
@@ -375,7 +380,10 @@ public sealed class PageBuilder
         });
 
         Section(CoreText.T("upd_check"));
-        Note(upd?.StatusText ?? CoreText.T("upd_store"), upd?.Available != null ? k.P.AccentText : null);
+        // Durum yazısı her çizimde güncel değerden okunur (indirme yüzdesi sayfayı yeniden kurmadan ilerler)
+        var statusColor = upd?.Available != null ? k.P.AccentText : k.P.SubText;
+        Painter(22, (g, r) => TextRenderer.DrawText(g, upd?.StatusText ?? CoreText.T("upd_store"), desc, r, statusColor,
+            TextFormatFlags.NoPrefix | TextFormatFlags.SingleLine | TextFormatFlags.EndEllipsis | TextFormatFlags.VerticalCenter));
         Gap(6);
         if (upd != null && Updater.Supported)
         {

@@ -6,3 +6,4 @@ dist/
 tools/node_modules/
 tools/*preview*.png
 apps/*/packaging/ekran-goruntuleri/
+apps/*/packaging/store-logo-300.png.tmp

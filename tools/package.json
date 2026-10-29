@@ -1,1 +1,1 @@
-{ "name": "grapekit-tools", "private": true, "type": "module", "dependencies": { "sharp": "0.33.5" } }
+{"name":"grapekit-tools","private":true,"type":"module","dependencies":{"opentype.js":"^1.3.4","sharp":"0.33.5"}}

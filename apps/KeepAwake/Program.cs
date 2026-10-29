@@ -2,8 +2,10 @@ namespace KeepAwake;
 
 internal static class Program
 {
-    const string MutexName = @"Local\KeepAwake.Tekil";
-    const string ShowEventName = @"Local\KeepAwake.Goster";
+    // Ayrı ayar klasörüyle (GRAPEKIT_SETTINGS_DIR) açılan deneme kopyası, kurulu kopyayla çakışmasın
+    static readonly string Suffix = Environment.GetEnvironmentVariable("GRAPEKIT_SETTINGS_DIR") is { Length: > 0 } ? ".Deneme" : "";
+    static readonly string MutexName = @"Local\KeepAwake.Tekil" + Suffix;
+    static readonly string ShowEventName = @"Local\KeepAwake.Goster" + Suffix;
 
     [System.Runtime.InteropServices.DllImport("user32.dll")]
     static extern bool AllowSetForegroundWindow(int pid);

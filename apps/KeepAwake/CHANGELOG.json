@@ -1,4 +1,9 @@
 {
+  "1.0.2": {
+    "tr": "Güncelleme indirilirken pencerenin kısa süre donması giderildi. Güncellemeden sonra program artık normal kullanıcı yetkisiyle açılıyor.",
+    "en": "Fixed the window briefly freezing while an update downloads. After updating, the app now starts with normal user rights.",
+    "de": "Fixed the window briefly freezing while an update downloads. After updating, the app now starts with normal user rights."
+  },
   "1.0.1": {
     "tr": "Özel süre: saat, dakika ve saniyeyi istediğin gibi yaz. Süre bitince ekranı kapat, kilitle, uykuya al veya bilgisayarı kapat (60 saniyelik uyarıyla). Hata bildir / öneri artık grapekit.com'daki geri bildirim sayfasını açıyor.",
     "en": "Custom length: type any hours, minutes and seconds. When time is up, turn off the screen, lock, sleep or shut down (with a 60-second warning). Report a bug / idea now opens the feedback page on grapekit.com.",
