@@ -375,3 +375,25 @@ body.zen .menubar-item, body.zen .tab, body.zen .tab-new, body.zen .winctl butto
 @media (max-width: 900px) { .menubar-item { padding: 0 6px; } .wl-actions { grid-template-columns: 1fr 1fr; } }
 @media (forced-colors: active) { .tab.active, .tb-btn[aria-pressed="true"], .seg button[aria-checked="true"] { outline: 2px solid CanvasText; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* ===== Tanıtım turu ===== */
+.tour { position: fixed; inset: 0; z-index: 900; }
+.tour.tour-dim { background: rgba(14, 6, 30, .55); }
+.tour-hole { position: fixed; border-radius: 10px; box-shadow: 0 0 0 9999px rgba(14, 6, 30, .55), 0 0 0 2px var(--accent); transition: left .22s ease, top .22s ease, width .22s ease, height .22s ease; pointer-events: none; }
+.tour-card { position: fixed; width: 340px; max-width: calc(100vw - 16px); padding: 16px 18px 14px; border-radius: 14px; background: var(--bg); color: var(--ink); border: 1px solid var(--line-2); box-shadow: var(--shadow); transition: left .22s ease, top .22s ease; }
+.tour-head { display: flex; align-items: center; gap: 8px; color: var(--accent-text); }
+.tour-head .ic { width: 20px; height: 20px; padding: 6px; box-sizing: content-box; border-radius: 9px; background: var(--accent-soft); }
+.tour-step { margin-left: auto; font-size: 12px; font-weight: 600; color: var(--muted); }
+.tour-card h3 { margin: 12px 0 6px; font: 700 17px/1.3 var(--font-head, var(--font-ui)); }
+.tour-card p { margin: 0; color: var(--ink-2); font-size: 13.5px; line-height: 1.55; }
+.tour-card kbd { display: inline-block; padding: 1px 6px; border-radius: 5px; background: var(--panel-2); color: var(--ink); font-size: 12px; }
+.tour-dots { display: flex; gap: 5px; margin: 14px 0 12px; }
+.tour-dots i { width: 6px; height: 6px; border-radius: 3px; background: var(--line-2); transition: width .2s; }
+.tour-dots i.on { width: 18px; background: var(--accent); }
+.tour-f { display: flex; align-items: center; gap: 8px; }
+.tour-f .sp { flex: 1; }
+.btn-ghost { border-color: transparent; background: transparent; color: var(--muted); }
+.btn-ghost:hover { color: var(--ink); }
+@media (prefers-reduced-motion: reduce) { .tour-hole, .tour-card, .tour-dots i { transition: none; } }
+.wl-hint { margin-top: 26px; color: var(--muted); font-size: 13px; text-align: center; }
+.wl-hint kbd { padding: 1px 6px; border-radius: 5px; background: var(--panel-2); color: var(--ink-2); font-size: 12px; }

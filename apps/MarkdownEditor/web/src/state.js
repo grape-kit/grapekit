@@ -17,6 +17,7 @@ export const DEFAULTS = {
   batch: { format: 'pdf', sub: true, same: true, out: '' },
   // Güncelleme
   autoUpdate: true,
+  tourDone: false,                         // ilk kullanım tanıtımı görüldü
   userTemplates: [],
 };
 

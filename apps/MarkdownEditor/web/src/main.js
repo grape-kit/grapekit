@@ -15,6 +15,7 @@ import * as xp from './exportui.js';
 import { initSidebar, show as showSide, markOutline, relabel as relabelSide, openFolder, focusSearch } from './sidebar.js';
 import { settingsDialog } from './settings.js';
 import { TEMPLATES, CHEATSHEET, templateText } from './templates.js';
+import { startTour } from './tour.js';
 import { htmlToMarkdown, isRichHtml } from './importer.js';
 
 const $ = (s) => document.querySelector(s);
@@ -226,6 +227,14 @@ function wireStatus() {
   });
 }
 
+// ===================== Tanıtım =====================
+/** Tur bir belge açıkken anlamlı: yoksa yeni bir belge açılır. */
+function runTour() {
+  if (!app.active) docs.newDoc('');
+  applyLayout();
+  setTimeout(() => startTour(() => { if (!app.settings.tourDone) { app.settings.tourDone = true; saveSettings(); } }), 0);
+}
+
 // ===================== Karşılama =====================
 async function drawWelcome() {
   const recent = (await call('recent.list', {})) || [];
@@ -241,7 +250,8 @@ async function drawWelcome() {
     <div class="wl-cols">
       <section><h2>${esc(t('welcome.templates'))}</h2><div class="wl-list">${TEMPLATES.map((x) => `<button type="button" data-tpl="${x.id}">${icon(x.icon)}<span>${esc(t('tpl.' + x.id))}</span></button>`).join('')}</div></section>
       <section><h2>${esc(t('welcome.recent'))}</h2><div class="wl-list">${recent.length ? recent.slice(0, 10).map((r) => `<button type="button" data-path="${esc(r.path)}" title="${esc(r.path)}">${icon(r.pinned ? 'pin' : 'file')}<span>${esc(baseName(r.path))}<small>${esc(r.path.replace(/[\\/][^\\/]*$/, ''))}</small></span></button>`).join('') : `<p class="side-empty">${esc(t('welcome.none'))}</p>`}</div></section>
-    </div></div>`;
+    </div>
+    <p class="wl-hint">${t('welcome.hint')}</p></div>`;
   ui.welcome.onclick = (e) => {
     const b = e.target.closest('button'); if (!b) return;
     if (b.dataset.a === 'new') run('file.new'); else if (b.dataset.a === 'open') run('file.open'); else if (b.dataset.a === 'folder') run('file.openFolder'); else if (b.dataset.a === 'guide') run('help.cheatsheet');
@@ -404,6 +414,7 @@ function registerCommands() {
   def('exp.batch', { run: () => xp.batchDialog(saveSettings), icon: 'layers' });
 
   def('help.cheatsheet', { run: () => { const tab = docs.newDoc(CHEATSHEET[getLang()]); tab.savedDoc = tab.state.doc; tab.guide = true; app.view.setState(tab.state); docs.activate(tab); S.viewMode = 'split'; applySetting('viewMode'); }, kbd: 'F1', icon: 'help' });
+  def('help.tour', { run: () => runTour() });
   def('help.shortcuts', { run: () => dlg.shortcutsDialog(), kbd: 'Ctrl+Alt+K', icon: 'keyboard' });
   def('help.feedback', { run: () => call('shell.url', { which: 'feedback' }) });
   def('help.site', { run: () => call('shell.url', { which: 'page' }), icon: 'external' });
@@ -421,7 +432,7 @@ const MENUS = [
   { label: 'menu.format', items: () => ['fmt.bold', 'fmt.italic', 'fmt.strike', 'fmt.code', 'fmt.mark', 'fmt.sup', 'fmt.sub', '-', 'fmt.h1', 'fmt.h2', 'fmt.h3', 'fmt.h4', 'fmt.h5', 'fmt.h6', 'fmt.h0', '-', 'fmt.quote', 'fmt.ul', 'fmt.ol', 'fmt.task', 'fmt.indent', 'fmt.outdent', '-', 'fmt.clear'] },
   { label: 'menu.table', items: () => ['insert.table', '-', 'tbl.format', '-', 'tbl.rowAbove', 'tbl.rowBelow', 'tbl.colLeft', 'tbl.colRight', '-', 'tbl.delRow', 'tbl.delCol', '-', 'tbl.alignL', 'tbl.alignC', 'tbl.alignR'] },
   { label: 'menu.export', items: () => ['exp.pdf', 'exp.html', 'exp.docx', 'exp.png', '-', 'edit.copyHtml', 'file.print', '-', 'exp.batch'] },
-  { label: 'menu.help', items: () => ['help.cheatsheet', 'help.shortcuts', '-', 'help.feedback', 'help.site', 'help.coffee', '-', ...(app.info.packaged ? [] : ['help.updates']), 'help.about'] },
+  { label: 'menu.help', items: () => ['help.cheatsheet', 'help.shortcuts', 'help.tour', '-', 'help.feedback', 'help.site', 'help.coffee', '-', ...(app.info.packaged ? [] : ['help.updates']), 'help.about'] },
 ];
 
 let recentCache = [];
@@ -562,6 +573,8 @@ async function boot() {
   // Olaylar
   on('tabs', () => { drawTabs(); applyLayout(); docs.saveSessionSoon(); });
   on('active', (tab) => {
+    // İlk kez bir belge açıldığında tanıtım (komut satırı dönüştürmede değil)
+    if (tab && !app.settings.tourDone && !app.info.headless && !document.querySelector('.modal')) setTimeout(() => { if (!app.settings.tourDone && app.active && !document.querySelector('.tour, .modal')) runTour(); }, 700);
     drawTabs(); drawStatus(); applyLayout(); renderSoon(0);
     if (tab) requestAnimationFrame(() => { ui.previewPane.scrollTop = tab.previewScroll || 0; });
   });
