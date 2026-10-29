@@ -80,5 +80,5 @@ jobs:
           New-Item -ItemType Directory -Force updates | Out-Null
           Copy-Item "dist/$id/update.json" "updates/$id.json" -Force
           git add "updates/$id.json"
-          git commit -m "$id: güncelleme bilgisi ${{ steps.tag.outputs.ver }}"
+          git commit -m "${id}: güncelleme bilgisi ${{ steps.tag.outputs.ver }}"
           git push origin main

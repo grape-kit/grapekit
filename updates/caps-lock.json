@@ -1,0 +1,26 @@
+{
+    "version": "1.1.0",
+    "tag": "caps-lock-v1.1.0",
+    "notes": {
+        "tr": "Caps Lock Göstergesi artık Grapekit ailesinde: yeni simge, yenilenen Hakkında sayfası, tepsi menüsünde Grapekit bağlantıları ve GitHub üzerinden otomatik güncelleme.",
+        "en": "Caps Lock Indicator is now part of Grapekit: new icon, refreshed About page, Grapekit links in the tray menu and automatic updates via GitHub.",
+        "de": "Die Feststelltasten-Anzeige gehört jetzt zu Grapekit: neues Symbol, überarbeitete Info-Seite, Grapekit-Links im Infobereich-Menü und automatische Updates über GitHub."
+    },
+    "files": {
+        "x64": {
+            "url": "https://github.com/grape-kit/grapekit/releases/download/caps-lock-v1.1.0/CapsGosterge-Setup-1.1.0-x64.exe",
+            "sha256": "D729D848166DE49D813C00ADF745574441EA02F79D78C9B97A74334DF2A66ABE",
+            "size": 45326316
+        },
+        "arm64": {
+            "url": "https://github.com/grape-kit/grapekit/releases/download/caps-lock-v1.1.0/CapsGosterge-Setup-1.1.0-arm64.exe",
+            "sha256": "72D28B040267146E43C3C83DE54D99932A57CD60B1C050799D9A028FC1A8C5BB",
+            "size": 40850281
+        },
+        "x86": {
+            "url": "https://github.com/grape-kit/grapekit/releases/download/caps-lock-v1.1.0/CapsGosterge-Setup-1.1.0-x86.exe",
+            "sha256": "9B59568487099AF08E6858F02DC4488B4D8AF830B0B267A33A737DB4C79DEEBC",
+            "size": 40529595
+        }
+    }
+}
