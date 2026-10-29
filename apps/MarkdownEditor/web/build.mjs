@@ -23,6 +23,7 @@ function copy(from, to) {
   } else fs.writeFileSync(dst, fs.readFileSync(src));
 }
 copy('src/index.html', 'index.html');
+copy('src/peek.html', 'peek.html');
 copy('src/assets', '.');
 for (const f of ['Bricolage-Bold.ttf', 'Figtree-Regular.ttf', 'Figtree-SemiBold.ttf'])
   fs.writeFileSync(path.join(out, 'fonts', f), fs.readFileSync(path.join(here, '../../../core/Grapekit.Core/Fonts', f)));
@@ -33,7 +34,7 @@ const common = {
 };
 
 const ctxs = [
-  await esbuild.context({ ...common, entryPoints: { app: path.join(here, 'src/main.js') }, outdir: out, format: 'esm', splitting: true, chunkNames: 'chunks/[name]-[hash]' }),
+  await esbuild.context({ ...common, entryPoints: { app: path.join(here, 'src/main.js'), peek: path.join(here, 'src/peek.js') }, outdir: out, format: 'esm', splitting: true, chunkNames: 'chunks/[name]-[hash]' }),
   await esbuild.context({ ...common, entryPoints: { app: path.join(here, 'src/styles/app.css'), preview: path.join(here, 'src/styles/preview.css') }, outdir: out,
     external: ['/fonts/*'] }),
 ];

@@ -32,7 +32,7 @@ internal sealed partial class MainForm
                 return new JsonObject
                 {
                     ["version"] = GrapekitApp.VersionText, ["lang"] = GrapekitApp.Lang == 0 ? "tr" : "en", ["packaged"] = GrapekitApp.IsPackaged,
-                    ["args"] = Arr(_startupFiles), ["dark"] = !ThemeInfo.AppsUseLight(), ["explorerMenu"] = Shell.ExplorerMenuEnabled(),
+                    ["args"] = Arr(_startupFiles), ["dark"] = !ThemeInfo.AppsUseLight(), ["explorerMenu"] = Shell.ExplorerMenuEnabled(), ["previewPane"] = Shell.PreviewPaneEnabled(),
                     ["updateStatus"] = _updates?.StatusText ?? "", ["headless"] = Headless,
 #if DEBUG
                     ["debug"] = true,
@@ -195,6 +195,7 @@ internal sealed partial class MainForm
             }
             case "shell.defaultApps": Shell.OpenDefaultApps(); return true;
             case "shell.explorerMenu": Shell.SetExplorerMenu(B(p, "enabled")); return Shell.ExplorerMenuEnabled();
+            case "shell.previewPane": Shell.SetPreviewPane(B(p, "enabled")); return Shell.PreviewPaneEnabled();
 
             // ---------- Pencere ----------
             case "window.min": WindowState = FormWindowState.Minimized; return true;

@@ -24,20 +24,26 @@
   <ItemGroup>
     <None Remove="packaging\**;dist\**;web\**" />
     <Compile Remove="packaging\**;dist\**;web\**" />
-    <!-- Arayüz (web\wwwroot) çıktının yanına wwwroot olarak kopyalanır -->
-    <Content Include="web\wwwroot\**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" Link="wwwroot\%(RecursiveDir)%(Filename)%(Extension)" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4314.35" />
   </ItemGroup>
 
-  <!-- Arayüzü derle (npm). SkipWeb=true ile atlanır. -->
-  <Target Name="BuildWeb" BeforeTargets="BeforeBuild;AssignTargetPaths" Condition="'$(SkipWeb)' != 'true' And !Exists('web\wwwroot\app.js')">
+  <!-- Arayüz (web\wwwroot) çıktının yanına wwwroot olarak kopyalanır. tools\build-app.ps1 arayüzü önceden derler. -->
+  <PropertyGroup>
+    <WebReady Condition="Exists('web\wwwroot\app.js')">true</WebReady>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(WebReady)' == 'true'">
+    <Content Include="web\wwwroot\**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" Link="wwwroot\%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <!-- Temiz kopyada doğrudan derlenirse: önce npm ile arayüzü üret, sonra öğeleri ekle. SkipWeb=true ile atlanır. -->
+  <Target Name="BuildWeb" BeforeTargets="AssignTargetPaths" Condition="'$(SkipWeb)' != 'true' And '$(WebReady)' != 'true'">
     <Exec Command="npm ci --no-audit --no-fund" WorkingDirectory="web" Condition="!Exists('web\node_modules')" />
     <Exec Command="npm run build" WorkingDirectory="web" />
     <ItemGroup>
-      <Content Include="web\wwwroot\**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" Link="wwwroot\%(RecursiveDir)%(Filename)%(Extension)" Exclude="@(Content)" />
+      <Content Include="web\wwwroot\**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" Link="wwwroot\%(RecursiveDir)%(Filename)%(Extension)" />
     </ItemGroup>
   </Target>
 

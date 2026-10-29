@@ -31,6 +31,17 @@ $brand = Join-Path $appDir.FullName 'brand'
 $page = "https://grapekit.com/uygulama/$($meta.slug.tr)"
 $files = [ordered]@{}
 
+# Web arayüzlü uygulamalar: arayüzü dotnet'ten önce derle (MSBuild dosyaları değerlendirme anında görsün)
+$web = Join-Path $appDir.FullName 'web'
+if ($meta.webview2 -and (Test-Path (Join-Path $web 'package.json'))) {
+    Write-Host "`n-- web arayüzü derleniyor" -ForegroundColor Yellow
+    Push-Location $web
+    try {
+        if (-not (Test-Path 'node_modules')) { npm ci --no-audit --no-fund; if ($LASTEXITCODE -ne 0) { throw "npm ci başarısız" } }
+        npm run build; if ($LASTEXITCODE -ne 0) { throw "Arayüz derlenemedi" }
+    } finally { Pop-Location }
+}
+
 foreach ($arch in $Archs) {
     Write-Host "`n-- ${arch}: derleniyor" -ForegroundColor Yellow
     $pub = Join-Path $dist "publish\$arch"

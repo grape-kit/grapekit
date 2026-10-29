@@ -75,6 +75,7 @@ function render(sec) {
       ${row(t('set.defaultEol'), '', field.seg('s-defaultEol', [['crlf', 'CRLF (Windows)'], ['lf', 'LF (Unix)']], s.defaultEol))}
       ${row(t('set.associate'), t('set.associateD'), `<button type="button" class="btn" id="a-assoc">${esc(t('open'))}</button>`)}
       ${app.info.packaged ? '' : row(t('set.explorer'), t('set.explorerD'), toggle('a-explorer', app.info.explorerMenu))}
+      ${app.info.packaged ? '' : row(t('set.previewPane'), t('set.previewPaneD'), toggle('a-previewPane', app.info.previewPane))}
       <div class="set-reset"><button type="button" class="btn btn-danger" id="a-reset">${esc(t('set.reset'))}</button></div>`;
     case 'about': return `<div class="about">
       <img src="icon.png" width="88" height="88" alt="">
@@ -100,6 +101,7 @@ function wire(body, sec, apply, redraw) {
     else if (id === 'x-cover') { s.pdf.cover = v; apply('pdf'); }
     else if (id === 'x-embed') { s.html.embed = v; apply('html'); }
     else if (id === 'a-explorer') call('shell.explorerMenu', { enabled: v }).then((r) => { app.info.explorerMenu = r; });
+    else if (id === 'a-previewPane') call('shell.previewPane', { enabled: v }).then((r) => { app.info.previewPane = r; });
   };
   for (const sg of body.querySelectorAll('.seg')) sg.addEventListener('change', () => {
     const k = sg.id.slice(2); let v = sg.dataset.value;

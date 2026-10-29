@@ -65,12 +65,33 @@ if ($meta.fileTypes) {
     $ext += '              <uap3:Verb Id="open" Parameters="&quot;%1&quot;">Open</uap3:Verb>'
     $ext += '              <uap3:Verb Id="topdf" Parameters="--to-pdf &quot;%1&quot;">Convert to PDF</uap3:Verb>'
     $ext += '            </uap2:SupportedVerbs>'
+    if ($meta.previewClsid) { $ext += "            <desktop2:DesktopPreviewHandler Clsid=`"$($meta.previewClsid)`" />" }
     $ext += '          </uap3:FileTypeAssociation>'
     $ext += '        </uap3:Extension>'
+}
+# Dosya Gezgini önizleme bölmesi: exe, -Embedding ile işlem dışı COM sunucusu
+if ($meta.previewClsid) {
+    $ext += '        <com:Extension Category="windows.comServer">'
+    $ext += '          <com:ComServer>'
+    $ext += '            <com:ExeServer Executable="$EXE$.exe" Arguments="-Embedding" DisplayName="$NAME$">'
+    $ext += "              <com:Class Id=`"$($meta.previewClsid)`" DisplayName=`"Markdown preview`" />"
+    $ext += '            </com:ExeServer>'
+    $ext += '          </com:ComServer>'
+    $ext += '        </com:Extension>'
 }
 $template = $template.Replace('$EXTENSIONS$', ($ext -join "`n"))
 $esc = { param($s) [Security.SecurityElement]::Escape([string]$s) }
 $packages = @()
+
+# Web arayüzlü uygulamalar: arayüzü dotnet'ten önce derle
+$web = Join-Path $appDir.FullName 'web'
+if ($meta.webview2 -and (Test-Path (Join-Path $web 'package.json'))) {
+    Push-Location $web
+    try {
+        if (-not (Test-Path 'node_modules')) { npm ci --no-audit --no-fund; if ($LASTEXITCODE -ne 0) { throw "npm ci başarısız" } }
+        npm run build; if ($LASTEXITCODE -ne 0) { throw "Arayüz derlenemedi" }
+    } finally { Pop-Location }
+}
 
 foreach ($arch in $Archs) {
     Write-Host "`n-- ${arch}: derleniyor" -ForegroundColor Yellow

@@ -158,6 +158,7 @@ const S = {
   'set.defaultEncoding': ['Yeni dosyalarda kodlama', 'Encoding for new files'], 'set.defaultEol': ['Yeni dosyalarda satır sonu', 'Line ending for new files'],
   'set.associate': ['.md dosyalarını Markdown Editörü ile aç', 'Open .md files with Markdown Studio'], 'set.associateD': ['Windows varsayılan uygulama ayarlarını açar', 'Opens Windows default apps settings'],
   'set.explorer': ['Gezgin\'e "PDF\'e dönüştür" ekle', 'Add "Convert to PDF" to Explorer'], 'set.explorerD': ['Sağ tık menüsünde .md dosyaları için', 'In the right-click menu for .md files'],
+  'set.previewPane': ['Gezgin önizleme bölmesi', 'Explorer preview pane'], 'set.previewPaneD': [".md dosyalarını Dosya Gezgini'nin önizleme bölmesinde biçimli göster (Alt+P)", "Show .md files formatted in File Explorer's preview pane (Alt+P)"],
   'set.updates': ['Güncellemeleri kendiliğinden denetle', 'Check for updates automatically'], 'set.reset': ['Ayarları sıfırla', 'Reset settings'],
   'set.version': ['Sürüm {v}', 'Version {v}'], 'set.free': ['Ücretsiz · Reklamsız · Açık kaynak (MIT)', 'Free · No ads · Open source (MIT)'],
   'set.privacy': ['Hiçbir veri toplanmaz. Uygulama tamamen çevrimdışı çalışır; yalnızca güncelleme denetimi sürüm numarasını okur.', 'No data is collected. The app works fully offline; only the update check reads a version number.'],

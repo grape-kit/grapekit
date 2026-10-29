@@ -20,6 +20,9 @@ internal static class Program
         GrapekitApp.Lang = LoadLang();
 
         if (args.Contains("--unregister")) { Shell.Unregister(); return 0; }
+        // Dosya Gezgini önizleme bölmesi: COM bu exe'yi "-Embedding" ile başlatır (tek kopya kuralı dışında)
+        if (args.Any(a => a.Equals("-Embedding", StringComparison.OrdinalIgnoreCase) || a.Equals("/Embedding", StringComparison.OrdinalIgnoreCase)))
+            return PreviewServer.Run();
 
         // Komut satırından dönüştürme: --to-pdf | --to-html | --to-docx | --to-png  girdi.md [çıktı]
         string? pdfIn = null, pdfOut = null, format = "pdf";
@@ -39,7 +42,8 @@ internal static class Program
 
         ApplicationConfiguration.Initialize();
         ErrorLog.Install();
-        Shell.RegisterFileTypes();
+        // Deneme kopyası (ayrı ayar klasörü) kullanıcının dosya ilişkilendirmelerine dokunmaz
+        if (!Suffix.StartsWith(".Deneme")) Shell.RegisterFileTypes();
 
         var form = new MainForm(files) { Headless = pdfIn != null };
         if (pdfIn != null)

@@ -53,6 +53,9 @@ internal static class Shell
                 reg.SetValue("Grapekit Markdown Editor", @"Software\Grapekit\MarkdownEditor\Capabilities");
             // Önceden açılmış Gezgin menüsü varsa yolunu tazele (uygulama taşınmış olabilir)
             if (ExplorerMenuEnabled()) SetExplorerMenu(true);
+            // Önizleme bölmesi: kullanıcı karar vermediyse ve başka bir .md önizleyicisi yoksa aç; açıksa yolunu tazele
+            var choice = Registry.CurrentUser.OpenSubKey(AppKey)?.GetValue("PreviewPane") as int?;
+            if (choice == 1 || (choice == null && !OtherPreviewHandler())) SetPreviewPane(true, remember: choice != null);
         }
         catch (Exception ex) { ErrorLog.Write(ex); }
     }
@@ -63,6 +66,7 @@ internal static class Shell
         try
         {
             SetExplorerMenu(false);
+            SetPreviewPane(false, remember: false);
             Registry.CurrentUser.DeleteSubKeyTree($@"{Classes}\{ProgId}", false);
             Registry.CurrentUser.DeleteSubKeyTree($@"{Classes}\Applications\{Path.GetFileName(Exe)}", false);
             foreach (var e in Extensions) using (var k = Registry.CurrentUser.OpenSubKey($@"{Classes}\{e}\OpenWithProgids", true)) k?.DeleteValue(ProgId, false);
@@ -104,6 +108,63 @@ internal static class Shell
             c.SetValue("", $"\"{Exe}\" --to-pdf \"%1\"");
         }
         Notify();
+    }
+
+    // --- Dosya Gezgini önizleme bölmesi (PreviewServer: bu exe, -Embedding ile COM sunucusu) ---
+    const string AppKey = @"Software\Grapekit\MarkdownEditor";
+    const string PreviewHandlerIid = "{8895b1c6-b41f-4c1c-a562-0d564250836f}";
+    static string PreviewClsid => PreviewServer.Clsid.ToString("B").ToUpperInvariant();
+
+    public static bool PreviewPaneEnabled()
+    {
+        if (GrapekitApp.IsPackaged) return false;
+        using var k = Registry.CurrentUser.OpenSubKey($@"{Classes}\.md\shellex\{PreviewHandlerIid}");
+        return string.Equals(k?.GetValue("") as string, PreviewClsid, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>.md için başka bir uygulamanın önizleyicisi kayıtlı mı (ör. PowerToys)? Onu habersiz ezmeyelim.</summary>
+    static bool OtherPreviewHandler()
+    {
+        using var k = Registry.ClassesRoot.OpenSubKey($@".md\shellex\{PreviewHandlerIid}");
+        var v = k?.GetValue("") as string;
+        return !string.IsNullOrEmpty(v) && !string.Equals(v, PreviewClsid, StringComparison.OrdinalIgnoreCase);
+    }
+
+    public static void SetPreviewPane(bool enabled, bool remember = true)
+    {
+        if (GrapekitApp.IsPackaged || string.IsNullOrEmpty(Exe)) return;
+        try
+        {
+            var name = GrapekitApp.Lang == 0 ? "Markdown Editörü önizleyicisi" : "Markdown Studio previewer";
+            var clsKey = $@"{Classes}\CLSID\{PreviewClsid}";
+            if (enabled)
+            {
+                using (var k = Registry.CurrentUser.CreateSubKey(clsKey))
+                {
+                    k.SetValue("", name);
+                    k.SetValue("DisplayName", name);
+                    using var ls = k.CreateSubKey("LocalServer32");
+                    ls.SetValue("", $"\"{Exe}\"");
+                }
+                foreach (var e in Extensions)
+                    using (var k = Registry.CurrentUser.CreateSubKey($@"{Classes}\{e}\shellex\{PreviewHandlerIid}")) k.SetValue("", PreviewClsid);
+                using (var k = Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows\CurrentVersion\PreviewHandlers")) k.SetValue(PreviewClsid, name);
+            }
+            else
+            {
+                foreach (var e in Extensions)
+                {
+                    var path = $@"{Classes}\{e}\shellex\{PreviewHandlerIid}";
+                    using var k = Registry.CurrentUser.OpenSubKey(path);
+                    if (string.Equals(k?.GetValue("") as string, PreviewClsid, StringComparison.OrdinalIgnoreCase)) { k!.Dispose(); Registry.CurrentUser.DeleteSubKeyTree(path, false); }
+                }
+                using (var k = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\PreviewHandlers", true)) k?.DeleteValue(PreviewClsid, false);
+                Registry.CurrentUser.DeleteSubKeyTree(clsKey, false);
+            }
+            if (remember) using (var k = Registry.CurrentUser.CreateSubKey(AppKey)) k.SetValue("PreviewPane", enabled ? 1 : 0, RegistryValueKind.DWord);
+            Notify();
+        }
+        catch (Exception ex) { ErrorLog.Write(ex); }
     }
 
     static void Notify() => Native.SHChangeNotify(0x08000000 /* SHCNE_ASSOCCHANGED */, 0, IntPtr.Zero, IntPtr.Zero);

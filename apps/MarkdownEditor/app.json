@@ -34,5 +34,6 @@
     "publisherName": "EC Studio",
     "displayName": "Markdown Editörü",
     "description": "Markdown yazın, önizleyin, PDF/Word/HTML'e aktarın / Write, preview and export Markdown to PDF, Word, HTML"
-  }
+  },
+  "previewClsid": "4D2A9E61-8B3C-4F5D-A1E7-3C0DEDA7A0B1"
 }
