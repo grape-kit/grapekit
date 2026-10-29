@@ -21,10 +21,11 @@
     "x86"
   ],
   "store": {
-    "identity": "DOLDUR.UykuEngelleyici",
+    "identity": "ECStudio.UykuEngelleyici",
     "publisher": "CN=33217EBC-D94A-4090-8D30-C335AD1E238B",
     "publisherName": "EC Studio",
     "displayName": "Uyku Engelleyici",
-    "description": "Bilgisayarı ve ekranı uyanık tutar / Keeps your PC and screen awake"
+    "description": "Bilgisayarı ve ekranı uyanık tutar / Keeps your PC and screen awake",
+    "storeId": "9P37BGNPN5ZG"
   }
 }
