@@ -56,7 +56,7 @@ Remove-Item (Join-Path $dist 'publish') -Recurse -Force
 $notesFile = Join-Path $appDir.FullName 'CHANGELOG.json'
 $notes = if (Test-Path $notesFile) { (Get-Content $notesFile -Raw -Encoding UTF8 | ConvertFrom-Json).$Version } else { $null }
 if (-not $notes) { $notes = [ordered]@{ tr = "Yenilikler ve iyileştirmeler."; en = "New features and improvements."; de = "Neue Funktionen und Verbesserungen." } }
-$json = [ordered]@{ version = $Version; tag = $Tag; notes = $notes; files = $files }
+$json = [ordered]@{ version = $Version; tag = $Tag; date = (Get-Date -Format "yyyy-MM-dd"); notes = $notes; files = $files }
 [IO.File]::WriteAllText((Join-Path $dist 'update.json'), ($json | ConvertTo-Json -Depth 6), (New-Object Text.UTF8Encoding $false))
 
 Write-Host "`nHazır:" -ForegroundColor Green

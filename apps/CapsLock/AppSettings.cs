@@ -78,7 +78,8 @@ internal sealed class AppSettings
 
     public const int MinDuration = 500, MaxDuration = 10000, DurationStep = 500;
 
-    public static string Dir => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "CapsGosterge");
+    // GRAPEKIT_SETTINGS_DIR: ekran görüntüsü ve testler için ayrı ayar klasörü (kullanıcının ayarlarına dokunmadan)
+    public static string Dir => Environment.GetEnvironmentVariable("GRAPEKIT_SETTINGS_DIR") is { Length: > 0 } d ? d : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "CapsGosterge");
     static string FilePath => Path.Combine(Dir, "ayarlar.json");
 
     public static bool Exists => File.Exists(FilePath);
