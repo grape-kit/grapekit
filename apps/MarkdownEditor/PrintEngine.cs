@@ -102,7 +102,7 @@ internal sealed class PrintEngine : IDisposable
     {
         var wv = await Ready();
         foreach (var d in docDirs) DocHosts.BaseFor(d);
-        _host!.Size = new Size(width, Math.Max(_host.Height, 900));
+        _host!.Bounds = new Rectangle(-32000, -32000, width, Math.Max(_host.Height, 900));
         var name = Guid.NewGuid().ToString("N") + ".html";
         var file = Path.Combine(_temp, name);
         File.WriteAllText(file, html, new UTF8Encoding(false));
@@ -189,9 +189,13 @@ internal sealed class PrintEngine : IDisposable
     });
 
     /// <summary>Windows yazdırma penceresini açar.</summary>
-    public Task<bool> Print(string html, IEnumerable<string> docDirs) => Job(async () =>
+    /// <summary>Sistem yazdırma diyaloğu. near: diyaloğun ortalanacağı alan (ana pencere).</summary>
+    public Task<bool> Print(string html, IEnumerable<string> docDirs, Rectangle near) => Job(async () =>
     {
         var wv = await Load(html, docDirs);
+        // Diyalog sahibinin konumuna göre açılır: gizli pencereyi (görünmez, 1×1) ana pencerenin ortasına al.
+        // Sonraki iş Load ile onu yine ekran dışına taşır.
+        _host!.Bounds = new Rectangle(near.Left + near.Width / 2, near.Top + near.Height / 2, 1, 1);
         wv.ShowPrintUI(CoreWebView2PrintDialogKind.System);
         return true;
     });

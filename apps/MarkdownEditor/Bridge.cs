@@ -175,7 +175,7 @@ internal sealed partial class MainForm
                 await _print!.Png(S(p, "html"), S(p, "path"), (int)N(p, "width", 900), N(p, "scale", 2), DocDirs(p));
                 return true;
             case "render.capture": return await _print!.Capture(S(p, "html"), (int)N(p, "count"));
-            case "print": await _print!.Print(S(p, "html"), DocDirs(p)); return true;
+            case "print": await _print!.Print(S(p, "html"), DocDirs(p), Bounds); return true;
             case "pdf.view": new PdfViewer(_env!, S(p, "path"), S(p, "title"), this).Show(this); return true;
 
             // ---------- Kabuk ----------
