@@ -82,15 +82,24 @@ german.LaunchApp={#AppNameDe} starten
 turkish.DesktopIcon=Masaüstü kısayolu oluştur
 english.DesktopIcon=Create a desktop shortcut
 german.DesktopIcon=Desktop-Verknüpfung erstellen
+turkish.InstallingWebView2=Microsoft Edge WebView2 bileşeni kuruluyor…
+english.InstallingWebView2=Installing the Microsoft Edge WebView2 component…
+german.InstallingWebView2=Microsoft Edge WebView2 wird installiert…
 
 [Messages]
 ; Standart sihirbaz metinlerinin Grapekit sürümü
 turkish.WelcomeLabel2=Bu sihirbaz bilgisayarınıza [name/ver] uygulamasını kuracak.%n%nGrapekit: Windows için küçük, kullanışlı ve ücretsiz araçlar.%n%nDevam etmeden önce diğer uygulamaları kapatmanız önerilir.
 english.WelcomeLabel2=This will install [name/ver] on your computer.%n%nGrapekit: small, handy and free tools for Windows.%n%nIt is recommended that you close all other applications before continuing.
 german.WelcomeLabel2=Dieser Assistent installiert [name/ver] auf Ihrem Computer.%n%nGrapekit: kleine, praktische und kostenlose Tools für Windows.%n%nBitte schließen Sie alle anderen Anwendungen, bevor Sie fortfahren.
+#ifdef DesktopApp
+turkish.FinishedLabel=[name] kuruldu.%n%nGrapekit'i tercih ettiğiniz için teşekkürler!
+english.FinishedLabel=[name] has been installed.%n%nThank you for choosing Grapekit!
+german.FinishedLabel=[name] wurde installiert.%n%nDanke, dass Sie Grapekit nutzen!
+#else
 turkish.FinishedLabel=[name] kuruldu. Uygulama sistem tepsisinde çalışır.%n%nGrapekit'i tercih ettiğiniz için teşekkürler!
 english.FinishedLabel=[name] has been installed. The app runs in the system tray.%n%nThank you for choosing Grapekit!
 german.FinishedLabel=[name] wurde installiert. Die App läuft im Infobereich.%n%nDanke, dass Sie Grapekit nutzen!
+#endif
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:DesktopIcon}"; Flags: unchecked
@@ -114,6 +123,48 @@ Filename: "{app}\{#AppExe}.exe"; Description: "{cm:LaunchApp}"; Flags: nowait po
 
 [UninstallRun]
 Filename: "{sys}\taskkill.exe"; Parameters: "/F /IM {#AppExe}.exe"; Flags: runhidden; RunOnceId: "StopApp"
+#ifdef DesktopApp
+; Uygulamanın kendi yaptığı Windows kayıtlarını (Birlikte aç, Gezgin menüsü) temizle
+Filename: "{app}\{#AppExe}.exe"; Parameters: "--unregister"; Flags: runhidden waituntilterminated; RunOnceId: "Unregister"
+#endif
 
 [UninstallDelete]
 Type: filesandordirs; Name: "{userappdata}\{#AppExe}"
+#ifdef WebView2
+Type: filesandordirs; Name: "{localappdata}\Grapekit\{#AppExe}"
+#endif
+
+#ifdef WebView2
+[Code]
+// Microsoft Edge WebView2 çalışma zamanı yoksa Microsoft'un küçük önyükleyicisiyle kurulur (Windows 11'de hazırdır).
+const WV2 = '{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}';
+
+function HasVersion(Root: Integer; Key: String): Boolean;
+var V: String;
+begin
+  Result := RegQueryStringValue(Root, Key, 'pv', V) and (V <> '') and (V <> '0.0.0.0');
+end;
+
+function WebView2Installed(): Boolean;
+begin
+  Result := HasVersion(HKLM, 'SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\' + WV2)
+         or HasVersion(HKLM, 'SOFTWARE\Microsoft\EdgeUpdate\Clients\' + WV2)
+         or HasVersion(HKCU, 'Software\Microsoft\EdgeUpdate\Clients\' + WV2);
+end;
+
+procedure CurStepChanged(CurStep: TSetupStep);
+var Code: Integer;
+begin
+  if (CurStep = ssPostInstall) and not WebView2Installed() then
+  begin
+    WizardForm.StatusLabel.Caption := CustomMessage('InstallingWebView2');
+    try
+      DownloadTemporaryFile('https://go.microsoft.com/fwlink/p/?LinkId=2124703', 'MicrosoftEdgeWebview2Setup.exe', '', nil);
+      if not Exec(ExpandConstant('{tmp}\MicrosoftEdgeWebview2Setup.exe'), '/silent /install', '', SW_HIDE, ewWaitUntilTerminated, Code) then
+        Log('WebView2 kurulumu başlatılamadı');
+    except
+      Log('WebView2 indirilemedi: ' + GetExceptionMessage);
+    end;
+  end;
+end;
+#endif

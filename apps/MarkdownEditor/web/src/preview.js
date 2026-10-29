@@ -8,9 +8,17 @@ let mermaidTheme = '';
 
 async function mermaid(dark) {
   if (!mermaidMod) mermaidMod = (await import('mermaid')).default;
-  const theme = dark ? 'dark' : 'default';
+  const theme = dark ? 'dark' : 'light';
   if (theme !== mermaidTheme) {
-    mermaidMod.initialize({ startOnLoad: false, securityLevel: 'strict', theme, fontFamily: 'Figtree, Segoe UI, sans-serif' });
+    // Grapekit renkleri (lila / gece moru)
+    const v = dark
+      ? { background: '#160A2C', primaryColor: '#2A1A52', primaryBorderColor: '#A78BFA', primaryTextColor: '#F1ECFF', secondaryColor: '#1E1038', tertiaryColor: '#241544',
+          lineColor: '#B4A9CF', textColor: '#F1ECFF', mainBkg: '#2A1A52', nodeBorder: '#A78BFA', clusterBkg: '#1E1038', clusterBorder: '#3B2766', edgeLabelBackground: '#241544',
+          noteBkgColor: '#3B2470', noteTextColor: '#F1ECFF', noteBorderColor: '#A78BFA', actorBkg: '#2A1A52', actorBorder: '#A78BFA', actorTextColor: '#F1ECFF', signalColor: '#CFC6EA', signalTextColor: '#F1ECFF' }
+      : { background: '#FFFFFF', primaryColor: '#F1EAFE', primaryBorderColor: '#7C3AED', primaryTextColor: '#1A0B33', secondaryColor: '#FAF8FE', tertiaryColor: '#F3EFFB',
+          lineColor: '#6B6478', textColor: '#1A0B33', mainBkg: '#F1EAFE', nodeBorder: '#7C3AED', clusterBkg: '#FAF8FE', clusterBorder: '#D9D1EC', edgeLabelBackground: '#FFFFFF',
+          noteBkgColor: '#FFF7D6', noteTextColor: '#1A0B33', noteBorderColor: '#D9B44A', actorBkg: '#F1EAFE', actorBorder: '#7C3AED', actorTextColor: '#1A0B33', signalColor: '#4B3F66', signalTextColor: '#1A0B33' };
+    mermaidMod.initialize({ startOnLoad: false, securityLevel: 'strict', theme: 'base', themeVariables: { ...v, fontFamily: 'Figtree, Segoe UI, sans-serif', fontSize: '15px' } });
     mermaidTheme = theme;
   }
   return mermaidMod;

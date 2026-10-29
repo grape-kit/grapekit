@@ -39,10 +39,14 @@ foreach ($arch in $Archs) {
     if ($LASTEXITCODE -ne 0) { throw "Derleme başarısız ($arch)" }
 
     Write-Host "-- ${arch}: kurulum dosyası" -ForegroundColor Yellow
+    # İsteğe bağlı: WebView2 kullanan / tepsi uygulaması olmayan (masaüstü) uygulamalar
+    $extra = @()
+    if ($meta.webview2) { $extra += "/DWebView2=1" }
+    if ($meta.kind -eq 'desktop') { $extra += "/DDesktopApp=1" }
     & $iscc /Q "/DAppId=$($meta.id)" "/DAppName=$($meta.name.tr)" "/DAppNameEn=$($meta.name.en)" "/DAppNameDe=$($meta.name.de)" `
         "/DAppExe=$($meta.exe)" "/DAppGuid={$($meta.guid)}" "/DAppMutex=$($meta.mutex)" "/DPageUrl=$page" `
         "/DAppIcon=$(Join-Path $brand 'app.ico')" "/DAppSmallImage=$(Join-Path $brand 'wizard-small.bmp')" "/DAppSmallImage2x=$(Join-Path $brand 'wizard-small-2x.bmp')" `
-        "/DAppVersion=$Version" "/DArch=$arch" "/DSourceDir=$pub" "/DOutDir=$dist" (Join-Path $root 'installer\grapekit.iss')
+        "/DAppVersion=$Version" "/DArch=$arch" "/DSourceDir=$pub" "/DOutDir=$dist" @extra (Join-Path $root 'installer\grapekit.iss')
     if ($LASTEXITCODE -ne 0) { throw "Inno Setup başarısız ($arch)" }
     $exe = Join-Path $dist "$($meta.exe)-Setup-$Version-$arch.exe"
     $files[$arch] = [ordered]@{

@@ -8,8 +8,10 @@
   xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
   xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
+  xmlns:uap2="http://schemas.microsoft.com/appx/manifest/uap/windows10/2"
+  xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
-  IgnorableNamespaces="uap desktop rescap">
+  IgnorableNamespaces="uap uap2 uap3 desktop rescap">
 
   <Identity Name="$IDENTITY$" Publisher="$PUBLISHER$" Version="$VERSION$" ProcessorArchitecture="$ARCH$" />
 
@@ -40,10 +42,7 @@
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
       </uap:VisualElements>
       <Extensions>
-        <!-- Windows açılışında başlatma (paketli uygulamalarda Run kaydı yerine; kimlik: Exe + "Startup") -->
-        <desktop:Extension Category="windows.startupTask" Executable="$EXE$.exe" EntryPoint="Windows.FullTrustApplication">
-          <desktop:StartupTask TaskId="$EXE$Startup" Enabled="true" DisplayName="$NAME$" />
-        </desktop:Extension>
+$EXTENSIONS$
       </Extensions>
     </Application>
   </Applications>

@@ -41,4 +41,9 @@
     </ItemGroup>
   </Target>
 
+  <!-- Kurulumu küçült: WinForms kullanıldığı için WPF kütüphanesi ve belge XML'leri gerekmez -->
+  <Target Name="TrimPublish" AfterTargets="Publish">
+    <Delete Files="$(PublishDir)Microsoft.Web.WebView2.Wpf.dll;$(PublishDir)Microsoft.Web.WebView2.Wpf.xml;$(PublishDir)Microsoft.Web.WebView2.Core.xml;$(PublishDir)Microsoft.Web.WebView2.WinForms.xml" />
+  </Target>
+
 </Project>

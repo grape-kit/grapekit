@@ -45,6 +45,30 @@ if (Test-Path $out) { Remove-Item $out -Recurse -Force }
 New-Item -ItemType Directory $out | Out-Null
 $msixVer = "$Version.0"
 $template = Get-Content (Join-Path $root 'installer\AppxManifest.xml') -Raw -Encoding UTF8
+# Uzantılar: tepsi uygulamalarında "Windows ile başlat"; dosya türü olanlarda ilişkilendirme ve Gezgin komutları
+$ext = @()
+if ($meta.kind -ne 'desktop') {
+    $ext += '        <desktop:Extension Category="windows.startupTask" Executable="$EXE$.exe" EntryPoint="Windows.FullTrustApplication">'
+    $ext += '          <desktop:StartupTask TaskId="$EXE$Startup" Enabled="true" DisplayName="$NAME$" />'
+    $ext += '        </desktop:Extension>'
+}
+if ($meta.fileTypes) {
+    $types = ($meta.fileTypes | ForEach-Object { "              <uap:FileType>$_</uap:FileType>" }) -join "`n"
+    $ext += '        <uap3:Extension Category="windows.fileTypeAssociation">'
+    $ext += '          <uap3:FileTypeAssociation Name="markdown">'
+    $ext += '            <uap:DisplayName>Markdown</uap:DisplayName>'
+    $ext += '            <uap:Logo>Assets\StoreLogo.png</uap:Logo>'
+    $ext += '            <uap:SupportedFileTypes>'
+    $ext += $types
+    $ext += '            </uap:SupportedFileTypes>'
+    $ext += '            <uap2:SupportedVerbs>'
+    $ext += '              <uap3:Verb Id="open" Parameters="&quot;%1&quot;">Open</uap3:Verb>'
+    $ext += '              <uap3:Verb Id="topdf" Parameters="--to-pdf &quot;%1&quot;">Convert to PDF</uap3:Verb>'
+    $ext += '            </uap2:SupportedVerbs>'
+    $ext += '          </uap3:FileTypeAssociation>'
+    $ext += '        </uap3:Extension>'
+}
+$template = $template.Replace('$EXTENSIONS$', ($ext -join "`n"))
 $esc = { param($s) [Security.SecurityElement]::Escape([string]$s) }
 $packages = @()
 
