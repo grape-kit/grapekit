@@ -41,7 +41,11 @@ public static class Updater
     {
         if (!Supported) return null;
         using var c = Client();
-        var json = await c.GetStringAsync(GrapekitApp.UpdateManifestUrl);
+        using var resp = await c.GetAsync(GrapekitApp.UpdateManifestUrl);
+        // Henüz hiç yayımlanmamış uygulama: bilgi dosyası yok, yani güncelleme de yok (bağlantı hatası değil)
+        if (resp.StatusCode == System.Net.HttpStatusCode.NotFound) return null;
+        resp.EnsureSuccessStatusCode();
+        var json = await resp.Content.ReadAsStringAsync();
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
         var ver = Version.Parse(root.GetProperty("version").GetString() ?? "0.0.0");
