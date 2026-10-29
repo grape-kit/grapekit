@@ -64,6 +64,7 @@ const S = {
   'cmd.help.about': ['Hakkında', 'About'], 'cmd.help.site': ['Uygulama sayfası', 'App page'], 'cmd.help.coffee': ['Bize kahve ısmarla', 'Buy us a coffee'],
 
   // Kenar çubuğu
+  'aria.menu': ['Menü', 'Menu'], 'aria.toolbar': ['Biçimlendirme', 'Formatting'], 'aria.sidebar': ['Kenar çubuğu', 'Sidebar'], 'aria.editor': ['Düzenleyici', 'Editor'], 'aria.preview': ['Önizleme', 'Preview'], 'aria.tabs': ['Belgeler', 'Documents'],
   'side.outline': ['İçindekiler', 'Outline'], 'side.files': ['Dosyalar', 'Files'], 'side.search': ['Ara', 'Search'],
   'side.noOutline': ['Belgede başlık yok. "# Başlık" yazarak ekleyin.', 'No headings yet. Type "# Heading" to add one.'],
   'side.noFolder': ['Bir klasör açın; içindeki Markdown dosyaları burada listelenir.', 'Open a folder to list its Markdown files here.'],
@@ -144,7 +145,7 @@ const S = {
   'set.export': ['Dışa aktarma', 'Export'], 'set.files': ['Dosyalar', 'Files'], 'set.shortcuts': ['Kısayollar', 'Shortcuts'], 'set.about': ['Hakkında', 'About'],
   'set.lang': ['Dil', 'Language'], 'set.theme': ['Uygulama teması', 'App theme'], 'set.startup': ['Açılışta', 'On startup'],
   'set.restoreSession': ['Son oturumu geri yükle', 'Restore the last session'], 'set.restoreSessionD': ['Açık sekmeler ve imleç konumları geri gelir', 'Reopens your tabs and cursor positions'],
-  'set.font': ['Yazı tipi', 'Font'], 'set.fontSize': ['Yazı boyutu', 'Font size'], 'set.tabSize': ['Sekme genişliği', 'Tab width'],
+  'set.font': ['Yazı tipi', 'Font'], 'set.fontProp': ['Figtree (orantılı)', 'Figtree (proportional)'], 'set.fontSize': ['Yazı boyutu', 'Font size'], 'set.tabSize': ['Sekme genişliği', 'Tab width'],
   'set.wrap': ['Satır kaydırma', 'Word wrap'], 'set.lineNumbers': ['Satır numaraları', 'Line numbers'], 'set.spell': ['Yazım denetimi', 'Spell check'],
   'set.spellLang': ['Yazım denetimi dili', 'Spell check language'], 'set.maxWidth': ['Düzenleyici satır genişliği', 'Editor line width'], 'set.unlimited': ['Sınırsız', 'Unlimited'],
   'set.smartPaste': ['Biçimli yapıştırmayı Markdown\'a çevir', 'Convert rich paste to Markdown'], 'set.smartPasteD': ['Web ve Word\'den kopyalanan içerik Markdown olarak yapıştırılır', 'Content copied from the web or Word is pasted as Markdown'],
@@ -184,4 +185,5 @@ export function applyI18n(root = document) {
   for (const el of root.querySelectorAll('[data-i18n]')) el.textContent = t(el.dataset.i18n);
   for (const el of root.querySelectorAll('[data-i18n-title]')) { el.title = t(el.dataset.i18nTitle); el.setAttribute('aria-label', el.title); }
   for (const el of root.querySelectorAll('[data-i18n-ph]')) el.placeholder = t(el.dataset.i18nPh);
+  for (const el of root.querySelectorAll('[data-i18n-aria]')) el.setAttribute('aria-label', t(el.dataset.i18nAria));
 }

@@ -360,8 +360,13 @@ select.field { padding-right: 6px; }
 
 /* ===== Dikkat dağıtmayan mod ===== */
 body.zen .toolbar, body.zen .statusbar { display: none; }
-body.zen #app { grid-template-rows: 40px 0 1fr 0; }
+/* Gizlenen araç ve durum çubukları ızgaradan çıkar: iki satır kalır */
+body.zen #app { grid-template-rows: 40px minmax(0, 1fr); }
+body.zen .workspace[data-mode] { grid-template-columns: 0 0 minmax(0, 1fr) 0 0; }
+body.zen .workspace[data-mode="preview"] { grid-template-columns: 0 0 0 0 minmax(0, 1fr); }
+body.zen .sidebar, body.zen .side-split { visibility: hidden; overflow: hidden; }
 body.zen .cm-content { max-width: 78ch; }
+body.zen .cm-scroller { padding-left: max(0px, calc((100% - 82ch) / 2)); }
 body.zen .titlebar { background: var(--bg); color: var(--ink); }
 body.zen .menubar, body.zen .tb-brand { opacity: 0; transition: opacity .2s; }
 body.zen .titlebar:hover .menubar, body.zen .titlebar:hover .tb-brand { opacity: 1; }

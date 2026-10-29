@@ -1,4 +1,4 @@
-// Markdown Editörü — ana modül: arayüzü kurar, modülleri birbirine bağlar.
+﻿// Markdown Editörü — ana modül: arayüzü kurar, modülleri birbirine bağlar.
 import { app, mergeSettings, baseName, extOf, MD_EXT, IMG_EXT } from './state.js';
 import { call, on as onHost, hasHost } from './bridge.js';
 import { on, emit } from './events.js';
@@ -28,6 +28,9 @@ const ui = {};
 let saveTimer = 0;
 function saveSettings() { clearTimeout(saveTimer); saveTimer = setTimeout(() => call('settings.save', { settings: app.settings }), 400); }
 
+// Yakınlaştırma basamakları (%)
+const ZOOMS = [60, 70, 80, 90, 100, 110, 125, 150, 175, 200, 250];
+
 /** Bir ayar değişince ilgili yerleri günceller. */
 function applySetting(k) {
   const s = app.settings;
@@ -37,6 +40,7 @@ function applySetting(k) {
   if (['previewTheme', 'previewFontSize', 'previewWidth', 'lineHeight', 'zoom', '*'].includes(k)) applyPreviewStyle();
   if (['breaks', 'remoteImages', 'previewTheme', '*'].includes(k)) renderSoon(0);
   if (['viewMode', 'sidebar', '*'].includes(k)) applyLayout();
+  if (k === 'zoom') drawStatus();
   saveSettings();
   refreshChrome();
 }
@@ -218,7 +222,7 @@ function wireStatus() {
     else if (k === 'eol') showMenu([['\r\n', 'CRLF (Windows)'], ['\n', 'LF (Unix / macOS)']].map(([v, l]) => ({ label: l, checked: tab.eol === v, run: () => { tab.eol = v; tab.savedDoc = app.view.newState('').doc; drawStatus(); drawTabs(); } })), r.left, r.top - 90);
     else if (k === 'enc') showMenu([['utf-8', false, 'UTF-8'], ['utf-8', true, 'UTF-8 BOM'], ['utf-16le', false, 'UTF-16 LE'], ['windows-1254', false, 'Windows-1254 (Türkçe)']].map(([v, bom, l]) => ({ label: l, checked: tab.encoding === v && tab.bom === bom, run: () => { tab.encoding = v; tab.bom = bom; tab.savedDoc = app.view.newState('').doc; drawStatus(); drawTabs(); } })), r.left, r.top - 130);
     else if (k === 'spell') showMenu([{ label: t('off'), checked: !app.settings.spellcheck, run: () => { app.settings.spellcheck = false; applySetting('spellcheck'); } }, { label: 'Türkçe', checked: app.settings.spellcheck && app.settings.spellLang === 'tr', run: () => { app.settings.spellcheck = true; app.settings.spellLang = 'tr'; applySetting('spellLang'); } }, { label: 'English', checked: app.settings.spellcheck && app.settings.spellLang === 'en', run: () => { app.settings.spellcheck = true; app.settings.spellLang = 'en'; applySetting('spellLang'); } }], r.left, r.top - 110);
-    else if (k === 'zoom') showMenu([80, 90, 100, 110, 125, 150, 175, 200].map((z) => ({ label: z + '%', checked: app.settings.zoom === z, run: () => { app.settings.zoom = z; applySetting('zoom'); } })), r.left, r.top - 260);
+    else if (k === 'zoom') showMenu(ZOOMS.map((z) => ({ label: z + '%', checked: app.settings.zoom === z, run: () => { app.settings.zoom = z; applySetting('zoom'); } })), r.left, r.top - ZOOMS.length * 32 - 16);
   });
 }
 
@@ -380,8 +384,8 @@ function registerCommands() {
   def('view.wrap', { run: () => { S.wordWrap = !S.wordWrap; applySetting('wordWrap'); }, kbd: 'Alt+Z', checked: () => S.wordWrap });
   def('view.lineNumbers', { run: () => { S.lineNumbers = !S.lineNumbers; applySetting('lineNumbers'); }, checked: () => S.lineNumbers });
   def('view.spell', { run: () => { S.spellcheck = !S.spellcheck; applySetting('spellcheck'); }, kbd: 'F7', checked: () => S.spellcheck });
-  def('view.zoomIn', { run: () => { S.zoom = Math.min(250, S.zoom + 10); applySetting('zoom'); }, kbd: ['Ctrl+=', 'Ctrl++'] });
-  def('view.zoomOut', { run: () => { S.zoom = Math.max(60, S.zoom - 10); applySetting('zoom'); }, kbd: 'Ctrl+-' });
+  def('view.zoomIn', { run: () => { S.zoom = ZOOMS.find((z) => z > S.zoom) ?? ZOOMS.at(-1); applySetting('zoom'); }, kbd: ['Ctrl+=', 'Ctrl++'] });
+  def('view.zoomOut', { run: () => { S.zoom = ZOOMS.findLast((z) => z < S.zoom) ?? ZOOMS[0]; applySetting('zoom'); }, kbd: 'Ctrl+-' });
   def('view.zoomReset', { run: () => { S.zoom = 100; applySetting('zoom'); }, kbd: 'Ctrl+Alt+0' });
   const themeNames = { grapekit: 'Grapekit', github: 'GitHub', academic: () => (getLang() === 'en' ? 'Academic' : 'Akademik'), sepia: () => (getLang() === 'en' ? 'Sepia' : 'Sepya'), dark: () => t('dark') };
   def('view.theme', { run: () => {}, submenu: () => Object.entries(themeNames).map(([k, n]) => ({ label: typeof n === 'function' ? n() : n, checked: S.previewTheme === k, run: () => { S.previewTheme = k; applySetting('previewTheme'); } })), icon: 'palette' });

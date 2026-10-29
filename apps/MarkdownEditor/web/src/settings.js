@@ -44,7 +44,7 @@ function render(sec) {
       ${app.info.packaged ? '' : row(t('set.updates'), '', toggle('s-autoUpdate', s.autoUpdate))}`;
     case 'editor': return `<h3>${esc(t('set.editor'))}</h3>
       ${row(t('set.fontSize'), '', sel('s-editorFontSize', [12, 13, 14, 15, 16, 17, 18, 20, 22, 24].map((n) => [n, n + ' px']), s.editorFontSize))}
-      ${row(t('set.font'), '', sel('s-editorFont', [['', 'Cascadia Code / Consolas'], ['Consolas, monospace', 'Consolas'], ['"Cascadia Mono", monospace', 'Cascadia Mono'], ['Figtree, "Segoe UI", sans-serif', 'Figtree (orantılı)'], ['Georgia, serif', 'Georgia (serif)']], s.editorFont))}
+      ${row(t('set.font'), '', sel('s-editorFont', [['', 'Cascadia Code / Consolas'], ['Consolas, monospace', 'Consolas'], ['"Cascadia Mono", monospace', 'Cascadia Mono'], ['Figtree, "Segoe UI", sans-serif', t('set.fontProp')], ['Georgia, serif', 'Georgia (serif)']], s.editorFont))}
       ${row(t('set.tabSize'), '', field.seg('s-tabSize', [[2, '2'], [4, '4'], [8, '8']], s.tabSize))}
       ${row(t('set.maxWidth'), '', sel('s-editorMaxWidth', [[0, t('set.unlimited')], [70, '70'], [80, '80'], [100, '100'], [120, '120']], s.editorMaxWidth))}
       ${row(t('set.wrap'), '', toggle('s-wordWrap', s.wordWrap))}
