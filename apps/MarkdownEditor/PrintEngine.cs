@@ -141,10 +141,14 @@ internal sealed class PrintEngine : IDisposable
         var wv = await Load(html, docDirs);
         var opt = JsonNode.Parse(options.ToJsonString())!.AsObject();
         opt["transferMode"] = "ReturnAsBase64";
+        var heads = (await Eval(wv, "[...document.querySelectorAll('h1,h2,h3,h4,h5,h6')].map(h => h.textContent.replace(/\\s+/g, ' ').trim())"))?.AsArray()
+            .Select(x => x?.GetValue<string>() ?? "").ToHashSet() ?? [];
         var r = await wv.CallDevToolsProtocolMethodAsync("Page.printToPDF", opt.ToJsonString());
         var data = JsonNode.Parse(r)?["data"]?.GetValue<string>() ?? throw new InvalidOperationException("PDF üretilemedi");
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-        await File.WriteAllBytesAsync(path, Convert.FromBase64String(data));
+        var bytes = Convert.FromBase64String(data);
+        PdfOutline.FixDoubledTitles(bytes, heads);
+        await File.WriteAllBytesAsync(path, bytes);
         return true;
     });
 
@@ -193,6 +197,62 @@ internal sealed class PrintEngine : IDisposable
     });
 
     public void Dispose() { _view?.Dispose(); _host?.Dispose(); try { Directory.Delete(_temp, true); } catch { } }
+}
+
+/// <summary>
+/// Chromium'un etiketli PDF yer imlerinde sayfa başına düşen başlığın metni iki kez yazılıyor ("BirBir").
+/// Yer imi başlığı, belgedeki bir başlığın iki katıysa teke indirilir. Dosyadaki bayt konumları değişmesin diye
+/// kısalan yer boşlukla doldurulur (çapraz başvuru tablosu geçerli kalır).
+/// </summary>
+internal static class PdfOutline
+{
+    public static void FixDoubledTitles(byte[] pdf, IReadOnlySet<string> headings)
+    {
+        if (headings.Count == 0) return;
+        var key = "/Title"u8;
+        for (int i = pdf.AsSpan().IndexOf(key); i >= 0;)
+        {
+            int s = i + key.Length;
+            while (s < pdf.Length && pdf[s] is (byte)' ' or (byte)'\r' or (byte)'\n') s++;
+            if (s < pdf.Length && pdf[s] == '(') FixLiteral(pdf, s, headings);
+            else if (s < pdf.Length && pdf[s] == '<') FixHex(pdf, s, headings);
+            int next = pdf.AsSpan(s).IndexOf(key);
+            i = next < 0 ? -1 : s + next;
+        }
+    }
+
+    // (metin): kaçış dizileri iki yarıda da aynı olduğundan ham baytlar karşılaştırılır
+    static void FixLiteral(byte[] pdf, int start, IReadOnlySet<string> heads)
+    {
+        int end = start + 1;
+        for (; end < pdf.Length && pdf[end] != ')'; end++) if (pdf[end] == '\\') end++;
+        if (end >= pdf.Length) return;
+        var inner = pdf.AsSpan(start + 1, end - start - 1);
+        if (inner.Length < 2 || inner.Length % 2 != 0 || !inner[..(inner.Length / 2)].SequenceEqual(inner[(inner.Length / 2)..])) return;
+        var half = Encoding.Latin1.GetString(inner[..(inner.Length / 2)]).Replace("\\(", "(").Replace("\\)", ")").Replace("\\\\", "\\");
+        if (!heads.Contains(half)) return;
+        int cut = start + 1 + inner.Length / 2;
+        pdf[cut] = (byte)')';
+        pdf.AsSpan(cut + 1, end - cut).Fill((byte)' ');
+    }
+
+    // <FEFF....>: UTF-16BE
+    static void FixHex(byte[] pdf, int start, IReadOnlySet<string> heads)
+    {
+        int end = pdf.AsSpan(start).IndexOf((byte)'>');
+        if (end < 0) return;
+        end += start;
+        var hex = Encoding.ASCII.GetString(pdf, start + 1, end - start - 1);
+        if (!hex.StartsWith("FEFF", StringComparison.OrdinalIgnoreCase) || hex.Any(char.IsWhiteSpace)) return;
+        var body = hex[4..];
+        if (body.Length < 8 || body.Length % 8 != 0 || body[..(body.Length / 2)] != body[(body.Length / 2)..]) return;
+        string half;
+        try { half = Encoding.BigEndianUnicode.GetString(Convert.FromHexString(body[..(body.Length / 2)])); } catch { return; }
+        if (!heads.Contains(half)) return;
+        int cut = start + 1 + 4 + body.Length / 2;
+        pdf[cut] = (byte)'>';
+        pdf.AsSpan(cut + 1, end - cut).Fill((byte)' ');
+    }
 }
 
 /// <summary>Görev çubuğunda, Alt+Tab'da görünmeyen ve odak almayan pencere (yazdırma motoru için).</summary>
