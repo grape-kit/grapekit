@@ -185,7 +185,10 @@ export function linePrefix(view, prefix, { numbered = false, exclusive = /^(#{1,
 
 export const heading = (view, level) => linePrefix(view, level ? '#'.repeat(level) + ' ' : '', { exclusive: /^#{1,6} / });
 
-/** İmleçte metin ekler; {sel} seçili metin yerine geçer, | imleç konumudur. */
+/** İmleç işareti (metinde geçmeyen karakter): bir tane → imleç, iki tane → aradaki seçilir. */
+export const CARET = '‸';
+
+/** İmleçte metin ekler; {sel} seçili metin yerine geçer, CARET imleç konumudur. */
 export function insertSnippet(view, tpl, { block = false } = {}) {
   const { state } = view;
   view.dispatch(state.changeByRange((r) => {
@@ -198,8 +201,8 @@ export function insertSnippet(view, tpl, { block = false } = {}) {
       post = '\n';
     }
     text = pre + text + post;
-    let caret = text.indexOf('|'), end = caret;
-    const sel2 = text.indexOf('|', caret + 1);
+    let caret = text.indexOf(CARET), end = caret;
+    const sel2 = text.indexOf(CARET, caret + 1);
     if (sel2 >= 0) { end = sel2 - 1; text = text.slice(0, sel2) + text.slice(sel2 + 1); }
     if (caret >= 0) text = text.slice(0, caret) + text.slice(caret + 1); else { caret = end = text.length; }
     return { changes: { from: r.from, to: r.to, insert: text }, range: EditorSelection.range(r.from + caret, r.from + end) };

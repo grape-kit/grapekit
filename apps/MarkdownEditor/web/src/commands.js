@@ -42,7 +42,7 @@ export function handleKey(e) {
   const id = bound.get(norm(e));
   if (!id) return false;
   const c = commands.get(id);
-  if (c.editorOnly && !e.target.closest('.cm-editor')) return false;
+  if (c.editorOnly && !e.target?.closest?.('.cm-editor')) return false;
   e.preventDefault(); e.stopPropagation();
   run(id);
   return true;
@@ -90,11 +90,13 @@ export function registerEditing() {
     kbd: 'Ctrl+\\',
   });
 
-  def('insert.code', { run: ed((v) => insertSnippet(v, '```|\n{sel}\n```', { block: true })), kbd: 'Ctrl+Shift+K', icon: 'codeblock' });
-  def('insert.hr', { run: ed((v) => insertSnippet(v, '---\n|', { block: true })), icon: 'hr' });
-  def('insert.math', { run: ed((v) => insertSnippet(v, '$$\n|{sel}|\n$$', { block: true })), kbd: 'Ctrl+Shift+M', icon: 'math' });
+  def('insert.code', { run: ed((v) => insertSnippet(v, '```‸\n{sel}\n```', { block: true })), kbd: 'Ctrl+Shift+K', icon: 'codeblock' });
+  def('insert.hr', { run: ed((v) => insertSnippet(v, '---\n‸', { block: true })), icon: 'hr' });
+  def('insert.math', { run: ed((v) => insertSnippet(v, '$$\n‸{sel}‸\n$$', { block: true })), kbd: 'Ctrl+Shift+M', icon: 'math' });
   def('insert.mathInline', { run: ed((v) => wrap(v, '$', '$', 'x^2')), kbd: 'Ctrl+M' });
-  def('insert.mermaid', { run: ed((v) => insertSnippet(v, '```mermaid\nflowchart LR\n  A[|Başla|] --> B{Karar}\n  B -- Evet --> C[Sonuç]\n  B -- Hayır --> A\n```', { block: true })), icon: 'diagram' });
+  def('insert.mermaid', { run: ed((v) => insertSnippet(v, app.settings.lang === 'en'
+    ? '```mermaid\nflowchart LR\n  A[‸Start‸] --> B{Decision}\n  B -- Yes --> C[Result]\n  B -- No --> A\n```'
+    : '```mermaid\nflowchart LR\n  A[‸Başla‸] --> B{Karar}\n  B -- Evet --> C[Sonuç]\n  B -- Hayır --> A\n```', { block: true })), icon: 'diagram' });
   def('insert.footnote', {
     run: ed((v) => {
       const n = ((v.state.doc.toString().match(/\[\^(\d+)\]/g) || []).map((x) => +x.slice(2, -1)).reduce((a, b) => Math.max(a, b), 0)) + 1;
@@ -104,8 +106,8 @@ export function registerEditing() {
     }),
     icon: 'footnote',
   });
-  def('insert.pagebreak', { run: ed((v) => insertSnippet(v, '<!-- pagebreak -->\n|', { block: true })), kbd: 'Ctrl+Enter', icon: 'pagebreak' });
-  def('insert.toc', { run: ed((v) => insertSnippet(v, '[TOC]\n|', { block: true })), icon: 'toc' });
+  def('insert.pagebreak', { run: ed((v) => insertSnippet(v, '<!-- pagebreak -->\n‸', { block: true })), kbd: 'Ctrl+Enter', icon: 'pagebreak' });
+  def('insert.toc', { run: ed((v) => insertSnippet(v, '[TOC]\n‸', { block: true })), icon: 'toc' });
   def('insert.frontMatter', {
     run: ed((v) => {
       if (/^---\r?\n/.test(v.state.doc.toString())) return;
@@ -115,10 +117,10 @@ export function registerEditing() {
     }),
   });
   def('insert.date', {
-    run: ed((v) => insertSnippet(v, new Date().toLocaleString(app.settings.lang === 'en' ? 'en-US' : 'tr-TR', { dateStyle: 'long', timeStyle: 'short' }) + '|')),
+    run: ed((v) => insertSnippet(v, new Date().toLocaleString(app.settings.lang === 'en' ? 'en-US' : 'tr-TR', { dateStyle: 'long', timeStyle: 'short' }) + '‸')),
     kbd: 'Alt+Shift+D', icon: 'calendar',
   });
-  def('insert.details', { run: ed((v) => insertSnippet(v, '<details>\n<summary>|Başlık|</summary>\n\n{sel}\n\n</details>', { block: true })), icon: 'details' });
+  def('insert.details', { run: ed((v) => insertSnippet(v, '<details>\n<summary>‸Başlık‸</summary>\n\n{sel}\n\n</details>', { block: true })), icon: 'details' });
 
   for (const op of ['format', 'rowAbove', 'rowBelow', 'colLeft', 'colRight', 'delRow', 'delCol', 'alignL', 'alignC', 'alignR'])
     def('tbl.' + op, { run: ed((v) => tableOp(v, op)), kbd: op === 'format' ? 'Ctrl+Alt+Shift+F' : undefined });

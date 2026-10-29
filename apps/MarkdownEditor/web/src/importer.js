@@ -21,6 +21,19 @@ function service() {
   });
   // Word'ün boş paragrafları ve gereksiz span'leri
   td.addRule('wordJunk', { filter: (n) => /^(O:P|W:.*)$/i.test(n.nodeName), replacement: () => '' });
+  // Markdown Editörü'nün kendi HTML çıktısındaki ön bilgi kartı → YAML ön bilgi
+  td.addRule('frontMatter', {
+    filter: (n) => n.nodeName === 'DL' && /\bfront-matter\b/.test(n.className || ''),
+    replacement: (_, n) => {
+      const rows = [...n.querySelectorAll('div')].map((d) => {
+        const dt = d.querySelector('dt');
+        const k = dt?.getAttribute('data-key') || dt?.textContent.trim().toLowerCase();
+        const v = d.querySelector('dd')?.textContent.trim() ?? '';
+        return k ? `${k}: ${/[:#'"]/.test(v) ? JSON.stringify(v) : v}` : '';
+      }).filter(Boolean);
+      return rows.length ? `---\n${rows.join('\n')}\n---\n\n` : '';
+    },
+  });
   td.addRule('mark', { filter: ['mark'], replacement: (c) => (c.trim() ? `==${c}==` : c) });
   td.addRule('sup', { filter: ['sup'], replacement: (c) => (c.trim() ? `^${c}^` : c) });
   td.addRule('sub', { filter: ['sub'], replacement: (c) => (c.trim() ? `~${c}~` : c) });

@@ -27,7 +27,7 @@ export async function linkDialog() {
   });
   if (!value || !value.url) return;
   const url = /\s/.test(value.url) ? `<${value.url}>` : value.url;
-  insertSnippet(V(), `[${value.text || value.url}](${url})|`);
+  insertSnippet(V(), `[${value.text || value.url}](${url})‸`);
 }
 
 // ---------- Görsel ----------
@@ -56,7 +56,7 @@ export async function imageDialog() {
     } else if (tab?.path) src = await call('path.relative', { from: dirName(tab.path), to: src });
     else src = 'file:///' + src.replace(/\\/g, '/');
   }
-  insertSnippet(V(), `![${value.alt}](${src.includes(' ') ? `<${src}>` : src})|`);
+  insertSnippet(V(), `![${value.alt}](${src.includes(' ') ? `<${src}>` : src})‸`);
 }
 
 /** Panodan/sürüklemeden görsel kaydeder ve bağlantısını ekler. data: base64, ext: png/jpg… */
@@ -64,7 +64,7 @@ export async function insertImageData(data, ext, name = '') {
   const tab = app.active;
   if (!tab?.path) { toast(t('ask.saveFirstImage'), { kind: 'warn', actions: [{ label: t('cmd.file.saveAs'), run: () => run('file.saveAs') }] }); return; }
   const r = await call('image.save', { docDir: dirName(tab.path), folder: app.settings.imageFolder, data, ext, name });
-  insertSnippet(V(), `![${name.replace(/\.[^.]+$/, '') || ''}](${r.rel.includes(' ') ? `<${r.rel}>` : r.rel})|`);
+  insertSnippet(V(), `![${name.replace(/\.[^.]+$/, '') || ''}](${r.rel.includes(' ') ? `<${r.rel}>` : r.rel})‸`);
   toast(t('info.imageSaved', { name: r.rel }), { timeout: 2500 });
 }
 
@@ -89,7 +89,10 @@ export async function tableDialog() {
     },
   });
   if (!value) return;
-  insertSnippet(V(), newTable(Math.max(1, value.rows), Math.min(30, Math.max(1, value.cols)), t('dlg.table.header')) + '\n|', { block: true });
+  // İmleç ilk başlık hücresinde, "Başlık 1" seçili gelir
+  const head = t('dlg.table.header');
+  const tbl = newTable(Math.max(1, value.rows), Math.min(30, Math.max(1, value.cols)), head).replace(`${head} 1`, `‸${head} 1‸`);
+  insertSnippet(V(), tbl, { block: true });
 }
 
 // ---------- Satıra git ----------
@@ -172,7 +175,7 @@ export async function emojiDialog() {
       };
       q.oninput = draw;
       q.onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); g.querySelector('button')?.click(); } };
-      g.onclick = (e) => { const b = e.target.closest('button'); if (b) { done(null); insertSnippet(V(), `:${b.dataset.k}:|`); } };
+      g.onclick = (e) => { const b = e.target.closest('button'); if (b) { done(null); insertSnippet(V(), `:${b.dataset.k}:‸`); } };
       draw();
     },
   });
@@ -188,7 +191,7 @@ export async function alertDialog() {
   });
   if (!value) return;
   const sel = selectedText(V());
-  insertSnippet(V(), `> [!${value.toUpperCase()}]\n> ${sel ? sel.split('\n').join('\n> ') : '|'}`, { block: true });
+  insertSnippet(V(), `> [!${value.toUpperCase()}]\n> ${sel ? sel.split('\n').join('\n> ') : '‸'}`, { block: true });
 }
 
 // ---------- Kısayollar ----------

@@ -159,7 +159,7 @@ function tocHtml(hs) {
 function metaCard(meta) {
   if (!meta || meta._error) return '';
   const rows = Object.entries(meta).filter(([, v]) => v != null && typeof v !== 'object' || Array.isArray(v))
-    .map(([k, v]) => `<div><dt>${esc(metaLabels[k.toLowerCase()] || k)}</dt><dd>${esc(Array.isArray(v) ? v.join(', ') : v)}</dd></div>`).join('');
+    .map(([k, v]) => `<div><dt data-key="${esc(k)}">${esc(metaLabels[k.toLowerCase()] || k)}</dt><dd>${esc(Array.isArray(v) ? v.join(', ') : v)}</dd></div>`).join('');
   return rows ? `<dl class="front-matter" data-line="0">${rows}</dl>` : '';
 }
 
@@ -179,7 +179,7 @@ export function render(src, opts = {}) {
   if (hs) html = html.replace(/<p[^>]*>\s*(\[TOC\]|\[\[_TOC_\]\]|\[İÇİNDEKİLER\])\s*<\/p>/gi, tocHtml(hs));
   html = metaCard(meta) + html;
   html = DOMPurify.sanitize(html, {
-    ADD_ATTR: ['data-line', 'data-tex', 'data-copy', 'target', 'checked', 'aria-hidden', 'encoding', 'xmlns', 'display', 'mathvariant'],
+    ADD_ATTR: ['data-key', 'data-line', 'data-tex', 'data-copy', 'target', 'checked', 'aria-hidden', 'encoding', 'xmlns', 'display', 'mathvariant'],
     ADD_TAGS: ['semantics', 'annotation', 'mrow', 'mi', 'mo', 'mn', 'msup', 'msub', 'mfrac', 'msqrt', 'mroot', 'mtext', 'mspace', 'mtable', 'mtr', 'mtd', 'mover', 'munder', 'munderover', 'msubsup', 'mstyle', 'mpadded', 'menclose', 'math'],
     FORBID_TAGS: ['style', 'form', 'iframe', 'object', 'embed', 'script', 'base', 'meta', 'link'],
     FORBID_ATTR: ['onerror', 'onload', 'onclick', 'formaction'],

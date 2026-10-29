@@ -77,7 +77,7 @@ internal sealed class PrintEngine : IDisposable
     async Task<CoreWebView2> Ready()
     {
         if (_view?.CoreWebView2 != null) return _view.CoreWebView2;
-        _host = new Form
+        _host = new HiddenForm
         {
             FormBorderStyle = FormBorderStyle.None, ShowInTaskbar = false, StartPosition = FormStartPosition.Manual,
             Location = new Point(-32000, -32000), Size = new Size(1240, 1754), Opacity = 0, Text = "print",
@@ -193,6 +193,16 @@ internal sealed class PrintEngine : IDisposable
     });
 
     public void Dispose() { _view?.Dispose(); _host?.Dispose(); try { Directory.Delete(_temp, true); } catch { } }
+}
+
+/// <summary>Görev çubuğunda, Alt+Tab'da görünmeyen ve odak almayan pencere (yazdırma motoru için).</summary>
+internal sealed class HiddenForm : Form
+{
+    protected override CreateParams CreateParams
+    {
+        get { var cp = base.CreateParams; cp.ExStyle |= 0x80 /* TOOLWINDOW */ | 0x08000000 /* NOACTIVATE */; return cp; }
+    }
+    protected override bool ShowWithoutActivation => true;
 }
 
 /// <summary>PDF önizleme penceresi (Edge'in PDF görüntüleyicisiyle).</summary>

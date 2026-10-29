@@ -269,7 +269,7 @@ async function onPaste(e, view) {
   const sel = view.state.selection.main;
   if (!sel.empty && /^(https?:\/\/|mailto:)\S+$/i.test(text.trim()) && !view.state.sliceDoc(sel.from, sel.to).includes('\n')) {
     e.preventDefault();
-    insertSnippet(view, `[{sel}](${text.trim()})|`);
+    insertSnippet(view, `[{sel}](${text.trim()})‸`);
     return true;
   }
   if (app.settings.smartPaste && !pastePlain && isRichHtml(html, text)) {
@@ -287,7 +287,7 @@ const blobToB64 = (b) => new Promise((res) => { const r = new FileReader(); r.on
 async function onDrop(e, view) {
   const files = [...(e.dataTransfer?.files || [])];
   const mdPath = e.dataTransfer?.getData('text/x-md-path');
-  if (mdPath) { e.preventDefault(); const pos = view.posAtCoords({ x: e.clientX, y: e.clientY }); if (pos != null) view.dispatch({ selection: { anchor: pos } }); const rel = app.active?.path ? await call('path.relative', { from: app.active.docDir, to: mdPath }) : mdPath; insertSnippet(view, `[${baseName(mdPath).replace(/\.[^.]+$/, '')}](${rel.includes(' ') ? `<${rel}>` : rel})|`); return true; }
+  if (mdPath) { e.preventDefault(); const pos = view.posAtCoords({ x: e.clientX, y: e.clientY }); if (pos != null) view.dispatch({ selection: { anchor: pos } }); const rel = app.active?.path ? await call('path.relative', { from: app.active.docDir, to: mdPath }) : mdPath; insertSnippet(view, `[${baseName(mdPath).replace(/\.[^.]+$/, '')}](${rel.includes(' ') ? `<${rel}>` : rel})‸`); return true; }
   if (!files.length) return false;
   e.preventDefault();
   const pos = view.posAtCoords({ x: e.clientX, y: e.clientY });
@@ -297,7 +297,7 @@ async function onDrop(e, view) {
     const f = files[i], p = paths?.[i];
     const ext = extOf(f.name);
     if (IMG_EXT.includes(ext)) {
-      if (p && app.active?.path) { const r = await call('image.import', { docDir: app.active.docDir, folder: app.settings.imageFolder, source: p }); insertSnippet(view, `![${f.name.replace(/\.[^.]+$/, '')}](${r.rel.includes(' ') ? `<${r.rel}>` : r.rel})\n|`); }
+      if (p && app.active?.path) { const r = await call('image.import', { docDir: app.active.docDir, folder: app.settings.imageFolder, source: p }); insertSnippet(view, `![${f.name.replace(/\.[^.]+$/, '')}](${r.rel.includes(' ') ? `<${r.rel}>` : r.rel})\n‸`); }
       else dlg.insertImageData(await blobToB64(f), ext, f.name);
     } else if (MD_EXT.includes(ext) && p) docs.openPaths([p]);
   }
@@ -518,6 +518,8 @@ async function boot() {
   buildChrome();
   wireTabs(); wireStatus(); wirePreview();
   initSidebar($('.sidebar'), saveSettings);
+  // Geliştirme derlemesi: otomatik testlerin erişimi
+  if (app.info.debug) window.__mde = { app, run, docs, dlg, xp, emit, call, settingsDialog, applySetting, importer: () => import('./importer.js') };
 
   // Bölücüler
   dragSplitter($('.split'), (e) => {
@@ -539,15 +541,15 @@ async function boot() {
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Alt' && !e.repeat) { ui.altDown = true; return; }
     ui.altDown = false;
-    if (document.querySelector('.modal-back') && !e.target.closest('.cm-editor')) return;
+    if (document.querySelector('.modal-back') && !e.target?.closest?.('.cm-editor')) return;
     handleKey(e);
   }, true);
   document.addEventListener('keyup', (e) => { if (e.key === 'Alt' && ui.altDown) { ui.altDown = false; ui.menubar.focus(); } });
-  document.addEventListener('contextmenu', (e) => { if (!e.target.closest('.cm-content, input, textarea, .preview')) e.preventDefault(); });
+  document.addEventListener('contextmenu', (e) => { if (!e.target?.closest?.('.cm-content, input, textarea, .preview')) e.preventDefault(); });
   // Pencereye dosya bırakma (düzenleyici dışı)
   document.addEventListener('dragover', (e) => { if ([...(e.dataTransfer?.types || [])].includes('Files')) e.preventDefault(); });
   document.addEventListener('drop', async (e) => {
-    if (e.target.closest('.cm-editor') || !e.dataTransfer?.files?.length) return;
+    if (e.target?.closest?.('.cm-editor') || !e.dataTransfer?.files?.length) return;
     e.preventDefault();
     const paths = await call('drop.paths', {}, e.dataTransfer.files);
     if (paths?.length) docs.openPaths(paths.filter((p) => MD_EXT.includes(extOf(p))));
@@ -564,7 +566,7 @@ async function boot() {
   on('insert-image-path', async (p) => {
     if (!app.active?.path) { toast(t('ask.saveFirstImage'), { kind: 'warn' }); return; }
     const rel = await call('path.relative', { from: app.active.docDir, to: p });
-    insertSnippet(app.view, `![${baseName(p).replace(/\.[^.]+$/, '')}](${rel.includes(' ') ? `<${rel}>` : rel})|`);
+    insertSnippet(app.view, `![${baseName(p).replace(/\.[^.]+$/, '')}](${rel.includes(' ') ? `<${rel}>` : rel})‸`);
   });
   on('reveal-line', (line) => { if (app.settings.viewMode !== 'editor' && map.length) { lead('editor'); ui.previewPane.scrollTo({ top: lineToY(map, line) - 8, behavior: 'smooth' }); } });
 

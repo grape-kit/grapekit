@@ -132,7 +132,12 @@ internal sealed partial class MainForm : Form
         try
         {
             var data = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Grapekit", GrapekitApp.Exe, "WebView2");
-            var opts = new CoreWebView2EnvironmentOptions(additionalBrowserArguments: "--disable-features=msSmartScreenProtection --enable-features=OverlayScrollbar")
+            var browserArgs = "--disable-features=msSmartScreenProtection --enable-features=OverlayScrollbar";
+#if DEBUG
+            // Yalnızca geliştirme derlemesi: otomatik testler için uzaktan hata ayıklama kapısı
+            if (Environment.GetEnvironmentVariable("GRAPEKIT_CDP_PORT") is { Length: > 0 } port) browserArgs += " --remote-debugging-port=" + port;
+#endif
+            var opts = new CoreWebView2EnvironmentOptions(additionalBrowserArguments: browserArgs)
             {
                 Language = GrapekitApp.Lang == 0 ? "tr-TR" : "en-US",
                 AreBrowserExtensionsEnabled = false,

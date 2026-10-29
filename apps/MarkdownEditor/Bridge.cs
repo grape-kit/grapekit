@@ -34,6 +34,9 @@ internal sealed partial class MainForm
                     ["version"] = GrapekitApp.VersionText, ["lang"] = GrapekitApp.Lang == 0 ? "tr" : "en", ["packaged"] = GrapekitApp.IsPackaged,
                     ["args"] = Arr(_startupFiles), ["dark"] = !ThemeInfo.AppsUseLight(), ["explorerMenu"] = Shell.ExplorerMenuEnabled(),
                     ["updateStatus"] = _updates?.StatusText ?? "", ["headless"] = Headless,
+#if DEBUG
+                    ["debug"] = true,
+#endif
                 };
             case "app.ready":
                 _ready = true;

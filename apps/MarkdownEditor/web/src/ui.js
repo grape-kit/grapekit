@@ -73,7 +73,7 @@ function closeFrom(m) {
 }
 function isDesc(m) { let c = openMenu; while (c) { if (c === m) return true; c = c.parentMenu; } return false; }
 
-document.addEventListener('mousedown', (e) => { if (openMenu && !e.target.closest('.menu') && !e.target.closest('.menubar button')) closeMenus(); }, true);
+document.addEventListener('mousedown', (e) => { if (openMenu && !e.target?.closest?.('.menu') && !e.target?.closest?.('.menubar button')) closeMenus(); }, true);
 addEventListener('blur', () => closeMenus());
 addEventListener('resize', () => closeMenus());
 
@@ -122,7 +122,7 @@ export function dialog({ title, body, buttons = [{ label: t('ok'), primary: true
     back.addEventListener('mousedown', (e) => { if (e.target === back) done(null); });
     const key = (e) => {
       if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); done(null); }
-      else if (e.key === 'Enter' && !e.shiftKey && e.target.tagName !== 'TEXTAREA' && e.target.tagName !== 'BUTTON' && !e.target.closest('.no-enter')) {
+      else if (e.key === 'Enter' && !e.shiftKey && e.target.tagName !== 'TEXTAREA' && e.target.tagName !== 'BUTTON' && !e.target?.closest?.('.no-enter')) {
         const p = buttons.find((x) => x.primary); if (p) { e.preventDefault(); done(typeof p.value === 'function' ? p.value(el) : p.value); }
       } else if (e.key === 'Tab') { // odak diyalogda kalır
         const fs = [...el.querySelectorAll('button, input, select, textarea, [tabindex="0"]')].filter((n) => !n.disabled && n.offsetParent);
