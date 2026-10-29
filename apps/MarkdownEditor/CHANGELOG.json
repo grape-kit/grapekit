@@ -1,7 +1,7 @@
 {
   "1.0.0": {
-    "tr": "İlk sürüm: canlı önizleme, GitHub uyumlu Markdown, formüller, diyagramlar, sekmeler, klasör paneli, PDF / HTML / Word / PNG çıktısı, içe aktarma, toplu dönüştürme.",
-    "en": "First release: live preview, GitHub-flavored Markdown, math, diagrams, tabs, folder panel, PDF / HTML / Word / PNG export, import and batch conversion.",
-    "de": "First release: live preview, GitHub-flavored Markdown, math, diagrams, tabs, folder panel, PDF / HTML / Word / PNG export, import and batch conversion."
+    "tr": "İlk sürüm: canlı önizleme, GitHub uyumlu Markdown, formüller, diyagramlar, sekmeler, klasör paneli, PDF / HTML / Word / PNG çıktısı, içe aktarma, toplu dönüştürme, Dosya Gezgini önizleme bölmesi, sağ tık › Yeni › Markdown belgesi ve kısa bir tanıtım turu.",
+    "en": "First release: live preview, GitHub-flavored Markdown, math, diagrams, tabs, folder panel, PDF / HTML / Word / PNG export, import, batch conversion, File Explorer preview pane, right-click › New › Markdown document and a short guided tour.",
+    "de": "First release: live preview, GitHub-flavored Markdown, math, diagrams, tabs, folder panel, PDF / HTML / Word / PNG export, import, batch conversion, File Explorer preview pane, right-click › New › Markdown document and a short guided tour."
   }
 }
