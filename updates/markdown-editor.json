@@ -1,0 +1,27 @@
+{
+  "version": "1.0.0",
+  "tag": "markdown-editor-v1.0.0",
+  "date": "2026-10-29",
+  "notes": {
+    "tr": "İlk sürüm: canlı önizleme, GitHub uyumlu Markdown, formüller, diyagramlar, sekmeler, klasör paneli, PDF / HTML / Word / PNG çıktısı, içe aktarma, toplu dönüştürme, Dosya Gezgini önizleme bölmesi, sağ tık › Yeni › Markdown belgesi ve kısa bir tanıtım turu.",
+    "en": "First release: live preview, GitHub-flavored Markdown, math, diagrams, tabs, folder panel, PDF / HTML / Word / PNG export, import, batch conversion, File Explorer preview pane, right-click › New › Markdown document and a short guided tour.",
+    "de": "First release: live preview, GitHub-flavored Markdown, math, diagrams, tabs, folder panel, PDF / HTML / Word / PNG export, import, batch conversion, File Explorer preview pane, right-click › New › Markdown document and a short guided tour."
+  },
+  "files": {
+    "x64": {
+      "url": "https://github.com/grape-kit/grapekit/releases/download/markdown-editor-v1.0.0/MarkdownEditor-Setup-1.0.0-x64.exe",
+      "sha256": "E4AA5088BA9BC3B6CCA49B399D633A5405BC1FE36CE931D9D1B273ADD1E4F46E",
+      "size": 48839411
+    },
+    "arm64": {
+      "url": "https://github.com/grape-kit/grapekit/releases/download/markdown-editor-v1.0.0/MarkdownEditor-Setup-1.0.0-arm64.exe",
+      "sha256": "B54E4454C768F8AE457CCF85F7FE34A18DAE0BF7FADBAA8ECCC0931F36BE9F51",
+      "size": 44308806
+    },
+    "x86": {
+      "url": "https://github.com/grape-kit/grapekit/releases/download/markdown-editor-v1.0.0/MarkdownEditor-Setup-1.0.0-x86.exe",
+      "sha256": "8F8CED738DD5B5B8792658F3974805B790977C9BC3C5E3F8845474DB6BF0EA2F",
+      "size": 43961130
+    }
+  }
+}
