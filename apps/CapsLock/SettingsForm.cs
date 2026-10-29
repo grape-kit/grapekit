@@ -826,7 +826,7 @@ internal sealed class SettingsForm : Form
         Divider();
         Buttons(null,
             (CoreText.T("source"), false, () => Brand.Open(GrapekitApp.SourceUrl), ""),
-            (CoreText.T("report"), false, () => Brand.Open(GrapekitApp.IssuesUrl), ""));
+            (CoreText.T("report"), false, () => Brand.Open(GrapekitApp.FeedbackUrl), ""));
         EndCard();
 
         Heading("update_head");

@@ -2,9 +2,40 @@
 // Kullanım: node make-icon.mjs <lucide-simge-adı> <#vurguRengi> <çıktı-klasörü>
 //   ör. node make-icon.mjs arrow-big-up-dash "#7C3AED" ../apps/CapsLock/brand
 // Üretir: app.ico (16–256), icon-512.png, icon-1024.png
+//
+// Özel çizim (önerilen, "premium" simgeler): node make-icon.mjs --art <brand-klasörü>
+//   <klasör>/icon-art.svg (48 px ve üstü) ve isteğe bağlı icon-art-small.svg (16–32 px, sade) kullanılır.
 import fs from 'node:fs';
 import path from 'node:path';
 import sharp from 'sharp';
+
+if (process.argv[2] === '--art') {
+  const dir = process.argv[3];
+  const art = fs.readFileSync(path.join(dir, 'icon-art.svg'));
+  const smallFile = path.join(dir, 'icon-art-small.svg');
+  const small = fs.existsSync(smallFile) ? fs.readFileSync(smallFile) : art;
+  const sizes = [16, 20, 24, 32, 40, 48, 64, 96, 128, 256];
+  const pngs = [];
+  for (const s of sizes) pngs.push({ s, buf: await sharp(s <= 32 ? small : art, { density: 72 * Math.max(1, s / 256) }).resize(s, s).png().toBuffer() });
+  writeIco(path.join(dir, 'app.ico'), pngs);
+  for (const s of [512, 1024]) await sharp(art).resize(s, s).png().toFile(path.join(dir, `icon-${s}.png`));
+  fs.copyFileSync(path.join(dir, 'icon-art.svg'), path.join(dir, 'icon.svg'));
+  console.log('Simge hazır →', path.resolve(dir));
+  process.exit(0);
+}
+
+function writeIco(file, pngs) {
+  const head = Buffer.alloc(6 + 16 * pngs.length);
+  head.writeUInt16LE(0, 0); head.writeUInt16LE(1, 2); head.writeUInt16LE(pngs.length, 4);
+  let off = head.length;
+  pngs.forEach(({ s, buf }, i) => {
+    const o = 6 + i * 16;
+    head.writeUInt8(s >= 256 ? 0 : s, o); head.writeUInt8(s >= 256 ? 0 : s, o + 1);
+    head.writeUInt16LE(1, o + 4); head.writeUInt16LE(32, o + 6);
+    head.writeUInt32LE(buf.length, o + 8); head.writeUInt32LE(off, o + 12); off += buf.length;
+  });
+  fs.writeFileSync(file, Buffer.concat([head, ...pngs.map(p => p.buf)]));
+}
 
 const [glyph, accent = '#7C3AED', out = '.'] = process.argv.slice(2);
 if (!glyph) { console.error('Kullanım: node make-icon.mjs <lucide-adı> <#renk> <klasör>'); process.exit(1); }
@@ -42,16 +73,7 @@ ${badge ? `<g transform="translate(360 360)"><circle cx="64" cy="64" r="70" fill
 const sizes = [16, 20, 24, 32, 40, 48, 64, 96, 128, 256];
 const pngs = [];
 for (const s of sizes) pngs.push({ s, buf: await sharp(Buffer.from(svg(s, s >= 96))).png().toBuffer() });
-const head = Buffer.alloc(6 + 16 * pngs.length);
-head.writeUInt16LE(0, 0); head.writeUInt16LE(1, 2); head.writeUInt16LE(pngs.length, 4);
-let off = head.length;
-pngs.forEach(({ s, buf }, i) => {
-  const o = 6 + i * 16;
-  head.writeUInt8(s >= 256 ? 0 : s, o); head.writeUInt8(s >= 256 ? 0 : s, o + 1);
-  head.writeUInt16LE(1, o + 4); head.writeUInt16LE(32, o + 6);
-  head.writeUInt32LE(buf.length, o + 8); head.writeUInt32LE(off, o + 12); off += buf.length;
-});
-fs.writeFileSync(path.join(out, 'app.ico'), Buffer.concat([head, ...pngs.map(p => p.buf)]));
+writeIco(path.join(out, 'app.ico'), pngs);
 for (const s of [512, 1024]) await sharp(Buffer.from(svg(s, true))).png().toFile(path.join(out, `icon-${s}.png`));
 fs.writeFileSync(path.join(out, 'icon.svg'), svg(512, true));
 console.log('Simge hazır →', path.resolve(out));

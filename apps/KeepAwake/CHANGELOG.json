@@ -1,0 +1,12 @@
+{
+  "1.0.1": {
+    "tr": "Özel süre: saat, dakika ve saniyeyi istediğin gibi yaz. Süre bitince ekranı kapat, kilitle, uykuya al veya bilgisayarı kapat (60 saniyelik uyarıyla). Hata bildir / öneri artık grapekit.com'daki geri bildirim sayfasını açıyor.",
+    "en": "Custom length: type any hours, minutes and seconds. When time is up, turn off the screen, lock, sleep or shut down (with a 60-second warning). Report a bug / idea now opens the feedback page on grapekit.com.",
+    "de": "Custom length: type any hours, minutes and seconds. When time is up, turn off the screen, lock, sleep or shut down (with a 60-second warning). Report a bug / idea now opens the feedback page on grapekit.com."
+  },
+  "1.0.0": {
+    "tr": "İlk sürüm: bilgisayarı ve ekranı uyanık tutma, süreler, program ve tam ekran kuralları, şarj/pil kuralları, genel kısayol.",
+    "en": "First release: keep your PC and screen awake, timers, app and full-screen rules, power and battery rules, global shortcut.",
+    "de": "First release: keep your PC and screen awake, timers, app and full-screen rules, power and battery rules, global shortcut."
+  }
+}

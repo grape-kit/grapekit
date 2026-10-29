@@ -33,7 +33,19 @@ public static class GrapekitApp
 
     public static string PageUrl => Lang == 0 ? $"{Brand.Website}/uygulama/{SlugTr}" : $"{Brand.Website}/en/app/{SlugEn}";
     public static string SourceUrl => $"{Brand.GitHub}/tree/main/apps/{Exe}";
-    public static string IssuesUrl => $"{Brand.GitHub}/issues/new?labels={Uri.EscapeDataString(Id)}&title={Uri.EscapeDataString($"[{Names[1]}] ")}";
+    /// <summary>grapekit.com'daki "Hata bildir / öneri" sayfası; uygulama, sürüm ve Windows sürümü hazır doldurulur.</summary>
+    public static string FeedbackUrl =>
+        (Lang == 0 ? $"{Brand.Website}/geri-bildirim" : $"{Brand.Website}/en/feedback")
+        + $"?app={Uri.EscapeDataString(Lang == 0 ? SlugTr : SlugEn)}&v={VersionText}&os={Uri.EscapeDataString(OsText)}";
+
+    static string OsText
+    {
+        get
+        {
+            int build = Environment.OSVersion.Version.Build;
+            return $"Windows {(build >= 22000 ? 11 : 10)} ({build})";
+        }
+    }
 
     public static void Init(string id, string exe, string[] names, string slugTr, string slugEn)
     {

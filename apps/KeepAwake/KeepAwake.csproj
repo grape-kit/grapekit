@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <RuntimeIdentifiers>win-x64;win-x86;win-arm64</RuntimeIdentifiers>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <ApplicationIcon>brand\app.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AssemblyName>KeepAwake</AssemblyName>
+    <RootNamespace>KeepAwake</RootNamespace>
+
+    <Product>Uyku Engelleyici</Product>
+    <AssemblyTitle>Uyku Engelleyici</AssemblyTitle>
+    <Version>1.0.1</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\core\Grapekit.Core\Grapekit.Core.csproj" />
+    <Using Include="Grapekit" />
+    <Using Include="Grapekit.Ui" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="packaging\**;dist\**" />
+    <Compile Remove="packaging\**;dist\**" />
+  </ItemGroup>
+
+</Project>

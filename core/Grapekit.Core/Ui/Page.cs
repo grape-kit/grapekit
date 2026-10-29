@@ -17,6 +17,8 @@ public sealed class Page : Panel
     public readonly List<(int X1, int X2, int Y)> Dividers = [];
     public readonly List<(string Text, Rectangle Rect, Color Color)> Paragraphs = [];
     public readonly List<Action<Graphics, Point>> Painters = [];
+    /// <summary>Kart köşe yarıçapı (mantıksal piksel).</summary>
+    public int CardRadius = 8;
 
     public Page(Palette p, Fonts f)
     {
@@ -55,15 +57,15 @@ public sealed class Page : Panel
         var o = AutoScrollPosition;
         Rectangle Off(Rectangle r) => new(r.X + o.X, r.Y + o.Y, r.Width, r.Height);
 
-        foreach (var (text, at, big) in Headings)
-            TextRenderer.DrawText(g, text, big ? _f.PageTitle : _f.Heading, new Point(at.X + o.X, at.Y + o.Y), P.Text, TextFormatFlags.NoPrefix);
-
         foreach (var c in Cards)
         {
             var r = Off(c);
-            Draw.Fill(g, r, S(8), P.Card);
-            Draw.Stroke(g, new RectangleF(r.X + 0.5f, r.Y + 0.5f, r.Width - 1, r.Height - 1), S(8), P.Border);
+            Draw.Fill(g, r, S(CardRadius), P.Card);
+            Draw.Stroke(g, new RectangleF(r.X + 0.5f, r.Y + 0.5f, r.Width - 1, r.Height - 1), S(CardRadius), P.Border);
         }
+
+        foreach (var (text, at, big) in Headings)
+            TextRenderer.DrawText(g, text, big ? _f.PageTitle : _f.Heading, new Point(at.X + o.X, at.Y + o.Y), P.Text, TextFormatFlags.NoPrefix);
 
         using (var pen = new Pen(P.Border))
             foreach (var (x1, x2, y) in Dividers) g.DrawLine(pen, x1 + o.X, y + o.Y, x2 + o.X, y + o.Y);
@@ -92,15 +94,27 @@ public sealed class Fonts : IDisposable
     public Font PageTitle = null!, Heading = null!, Row = null!, Desc = null!, Ctl = null!, Nav = null!, Big = null!, Small = null!;
     readonly List<Font> _all = [];
 
+    Font Keep(Font f) { _all.Add(f); return f; }
+
+    /// <summary>Grapekit marka yazı tipleri: başlıklar Bricolage Grotesque, metin Figtree.</summary>
+    public void CreateBrand(int dpi)
+    {
+        Dispose();
+        float k = dpi / 96f;
+        PageTitle = Keep(BrandFonts.Display(24 * k));
+        Heading = Keep(BrandFonts.Display(17 * k));
+        Row = Keep(BrandFonts.BodySemi(14 * k));
+        Desc = Keep(BrandFonts.Body(13 * k));
+        Ctl = Keep(BrandFonts.BodySemi(13 * k));
+        Nav = Keep(BrandFonts.BodySemi(14 * k));
+        Big = Keep(BrandFonts.Display(30 * k));
+        Small = Keep(BrandFonts.Body(12 * k));
+    }
+
     public void Create(int dpi)
     {
         Dispose();
-        Font F(string family, float px)
-        {
-            var f = new Font(family, px * dpi / 96f, FontStyle.Regular, GraphicsUnit.Pixel);
-            _all.Add(f);
-            return f;
-        }
+        Font F(string family, float px) => Keep(new Font(family, px * dpi / 96f, FontStyle.Regular, GraphicsUnit.Pixel));
         PageTitle = F("Segoe UI Semibold", 26);
         Heading = F("Segoe UI Semibold", 14);
         Row = F("Segoe UI", 14);

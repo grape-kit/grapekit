@@ -74,7 +74,10 @@ public sealed class ToggleRow : ThemedControl
 
     public event Action<bool>? CheckedChanged;
 
-    public ToggleRow(Palette p, string title, string desc, bool value, Font titleFont, Font descFont) : base(p)
+    /// <summary>Metnin soldan boşluğu (mantıksal piksel).</summary>
+    public int Inset { get; set; } = 12;
+
+    public ToggleRow(Palette p, string title, string desc, bool value, Font titleFont, Font descFont, Color? surface = null) : base(p, surface)
     {
         _title = title; _desc = desc; _checked = value; _k = value ? 1 : 0;
         _titleFont = titleFont; _descFont = descFont;
@@ -112,26 +115,25 @@ public sealed class ToggleRow : ThemedControl
         float rad = Sf(6);
         if (Hover && Enabled) Draw.Fill(g, new RectangleF(0, 0, Width, Height), rad, P.Hover);
 
-        int sw = S(42), sh = S(22);
-        var sr = new RectangleF(Width - S(14) - sw, (Height - sh) / 2f, sw, sh);
+        int sw = S(44), sh = S(26);
+        var sr = new RectangleF(Width - S(Inset == 0 ? 2 : 14) - sw, (Height - sh) / 2f, sw, sh);
 
-        int left = S(12), textW = (int)sr.Left - S(16) - left;
+        int left = S(Inset), textW = (int)sr.Left - S(16) - left;
         int th = _titleFont.Height, dh = string.IsNullOrEmpty(_desc) ? 0 : _descFont.Height, gap = dh > 0 ? S(2) : 0;
         int top = (Height - (th + gap + dh)) / 2;
         DrawText(g, _title, _titleFont, new Rectangle(left, top, textW, th), Dim(P.Text));
         if (dh > 0) DrawText(g, _desc, _descFont, new Rectangle(left, top + th + gap, textW, dh), Dim(P.SubText));
 
+        // Grapekit anahtarı: yuvarlak hat, üzüm kutucuğu gibi köşeli düğme
         Color track = ThemeInfo.Mix(Surface, P.Accent, _k);
+        float bw = Math.Max(1.5f, Sf(2));
         Draw.Fill(g, sr, sh / 2f, Dim(track));
-        if (_k < 1)
-            Draw.Stroke(g, RectangleF.Inflate(sr, -0.5f, -0.5f), sh / 2f,
-                Dim(Color.FromArgb((int)(255 * (1 - _k)), P.SubText)), Math.Max(1f, Sf(1.2f)));
+        Draw.Stroke(g, RectangleF.Inflate(sr, -bw / 2, -bw / 2), sh / 2f - bw / 2, Dim(ThemeInfo.Mix(P.SubText, P.Accent, _k)), bw);
 
-        float d = Sf(12) + Sf(4) * _k;
-        float x0 = sr.Left + Sf(5), x1 = sr.Right - Sf(4) - Sf(16);
-        float kx = x0 + (x1 - x0) * _k + (Sf(16) - d) / 2 * (1 - _k);
-        using (var b = new SolidBrush(Dim(ThemeInfo.Mix(P.SubText, P.OnAccent, _k))))
-            g.FillEllipse(b, kx, sr.Top + (sh - d) / 2f, d, d);
+        float d = Sf(14);
+        float x0 = sr.Left + Sf(5), x1 = sr.Right - Sf(5) - d;
+        var knob = new RectangleF(x0 + (x1 - x0) * _k, sr.Top + (sh - d) / 2f, d, d);
+        Draw.Fill(g, knob, Sf(5), Dim(ThemeInfo.Mix(P.SubText, P.OnAccent, _k)));
 
         FocusRing(g, rad);
     }
@@ -381,7 +383,12 @@ public sealed class Stepper : ThemedControl
 
     public event Action<int>? ValueChanged;
 
-    public Stepper(Palette p, int value, int min, int max, int step, Func<int, string> format, Font font, bool wrap = false) : base(p)
+    /// <summary>İsteğe bağlı değişken adım: (değer, yön ±1) → yeni değer. Verilmezse sabit adım.</summary>
+    public Func<int, int, int>? Next { get; set; }
+
+    void Step(int dir) => Value = Next != null ? Next(_value, dir) : _value + dir * _step;
+
+    public Stepper(Palette p, int value, int min, int max, int step, Func<int, string> format, Font font, bool wrap = false, Color? surface = null) : base(p, surface)
     {
         _value = value; _min = min; _max = max; _step = step; _format = format; _wrap = wrap; Font = font;
         AccessibleRole = AccessibleRole.SpinButton;
@@ -422,7 +429,7 @@ public sealed class Stepper : ThemedControl
         if (e.Button == MouseButtons.Left)
         {
             int z = ZoneAt(e.Location);
-            if (z == 0) Value -= _step; else if (z == 1) Value += _step;
+            if (z == 0) Step(-1); else if (z == 1) Step(1);
         }
         base.OnMouseClick(e);
     }
@@ -431,7 +438,7 @@ public sealed class Stepper : ThemedControl
 
     protected override void OnMouseWheel(MouseEventArgs e)
     {
-        if (Enabled && Focused) Value += Math.Sign(e.Delta) * _step;
+        if (Enabled && Focused) Step(Math.Sign(e.Delta));
         base.OnMouseWheel(e);
     }
 
@@ -439,8 +446,8 @@ public sealed class Stepper : ThemedControl
 
     protected override void OnKeyDown(KeyEventArgs e)
     {
-        if (e.KeyCode is Keys.Left or Keys.Down or Keys.Subtract or Keys.OemMinus) Value -= _step;
-        else if (e.KeyCode is Keys.Right or Keys.Up or Keys.Add or Keys.Oemplus) Value += _step;
+        if (e.KeyCode is Keys.Left or Keys.Down or Keys.Subtract or Keys.OemMinus) Step(-1);
+        else if (e.KeyCode is Keys.Right or Keys.Up or Keys.Add or Keys.Oemplus) Step(1);
         base.OnKeyDown(e);
     }
 
@@ -569,7 +576,7 @@ public sealed class DropDown : ThemedControl
 
     public event Action<int>? SelectedChanged;
 
-    public DropDown(Palette p, string[] options, int selected, Font font) : base(p)
+    public DropDown(Palette p, string[] options, int selected, Font font, Color? surface = null) : base(p, surface)
     {
         _options = options; _selected = Math.Clamp(selected, 0, options.Length - 1); Font = font;
         AccessibleRole = AccessibleRole.ComboBox;
@@ -632,7 +639,13 @@ public sealed class HotkeyBox : ThemedControl
     public event Action<int>? ComboChanged;
     public event Action<bool>? CaptureChanged;
 
-    public HotkeyBox(Palette p, int combo, string prompt, Font font) : base(p)
+    /// <summary>Tuş kapakları görünümü (Grapekit ayarlar penceresi). CapsFont: kapak yazısı.</summary>
+    public bool CapsStyle { get; set; }
+    public Font? CapsFont { get; set; }
+    public int Combo => _combo;
+    public void BeginCapture() { Focus(); SetCapturing(true); }
+
+    public HotkeyBox(Palette p, int combo, string prompt, Font font, Color? surface = null) : base(p, surface)
     {
         _combo = combo; _prompt = prompt; Font = font;
         AccessibleRole = AccessibleRole.HotkeyField;
@@ -688,9 +701,45 @@ public sealed class HotkeyBox : ThemedControl
         base.OnKeyDown(e);
     }
 
+    void PaintCaps(Graphics g)
+    {
+        float rad = Sf(16);
+        if (_capturing)
+        {
+            using var pen = new Pen(P.Accent, Sf(2)) { DashStyle = System.Drawing.Drawing2D.DashStyle.Dash };
+            using var path = Draw.Round(new RectangleF(Sf(1), Sf(1), Width - Sf(2), Height - Sf(2)), rad);
+            g.DrawPath(pen, path);
+            Center(g, _prompt, Font, ClientRectangle, P.AccentText);
+            return;
+        }
+        var font = CapsFont ?? Font;
+        var parts = (_combo & 0xFFFF) == 0 ? ["—"] : HotkeyText.Describe(_combo).Split(" + ");
+        int ch = S(56), gap = S(10), plusW = TextRenderer.MeasureText("+", font).Width;
+        var widths = parts.Select(t => Math.Max(S(64), TextRenderer.MeasureText(t, font).Width + S(28))).ToArray();
+        int total = widths.Sum() + (parts.Length - 1) * (plusW + gap * 2);
+        int x = (Width - total) / 2, y = (Height - ch) / 2;
+        for (int i = 0; i < parts.Length; i++)
+        {
+            bool last = i == parts.Length - 1 && parts.Length > 1;
+            var r = new RectangleF(x, y, widths[i], ch);
+            Color face = last ? P.Accent : P.Bg, edge = last ? ThemeInfo.Mix(P.Accent, Color.Black, 0.3) : P.Border;
+            Draw.Fill(g, r, Sf(14), Dim(edge));
+            Draw.Fill(g, new RectangleF(r.X + Sf(1), r.Y + Sf(1), r.Width - Sf(2), r.Height - Sf(4)), Sf(13), Dim(face));
+            Center(g, parts[i], font, Rectangle.Round(new RectangleF(r.X, r.Y, r.Width, r.Height - Sf(3))), Dim(last ? P.OnAccent : P.Text));
+            x += widths[i];
+            if (i < parts.Length - 1)
+            {
+                Center(g, "+", font, new Rectangle(x + gap, y, plusW, ch), P.SubText);
+                x += plusW + gap * 2;
+            }
+        }
+        FocusRing(g, rad);
+    }
+
     protected override void OnPaint(PaintEventArgs e)
     {
         var g = Begin(e);
+        if (CapsStyle) { PaintCaps(g); return; }
         float rad = Sf(7);
         Draw.Fill(g, new RectangleF(0, 0, Width, Height), rad, Dim(P.Neutral));
         if (_capturing)

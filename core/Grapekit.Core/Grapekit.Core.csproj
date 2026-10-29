@@ -7,4 +7,9 @@
     <AssemblyName>Grapekit.Core</AssemblyName>
   </PropertyGroup>
 
+  <!-- Marka yazı tipleri (SIL Open Font License; lisanslar Fonts klasöründe) -->
+  <ItemGroup>
+    <EmbeddedResource Include="Fonts\*.ttf" LogicalName="Grapekit.Fonts.%(Filename)%(Extension)" />
+  </ItemGroup>
+
 </Project>
