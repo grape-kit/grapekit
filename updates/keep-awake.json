@@ -1,0 +1,27 @@
+{
+  "version": "1.0.1",
+  "tag": "keep-awake-v1.0.1",
+  "date": "2026-10-29",
+  "notes": {
+    "tr": "Özel süre: saat, dakika ve saniyeyi istediğin gibi yaz. Süre bitince ekranı kapat, kilitle, uykuya al veya bilgisayarı kapat (60 saniyelik uyarıyla). Hata bildir / öneri artık grapekit.com'daki geri bildirim sayfasını açıyor.",
+    "en": "Custom length: type any hours, minutes and seconds. When time is up, turn off the screen, lock, sleep or shut down (with a 60-second warning). Report a bug / idea now opens the feedback page on grapekit.com.",
+    "de": "Custom length: type any hours, minutes and seconds. When time is up, turn off the screen, lock, sleep or shut down (with a 60-second warning). Report a bug / idea now opens the feedback page on grapekit.com."
+  },
+  "files": {
+    "x64": {
+      "url": "https://github.com/grape-kit/grapekit/releases/download/keep-awake-v1.0.1/KeepAwake-Setup-1.0.1-x64.exe",
+      "sha256": "F4CD3D3BF4ACFE22D7D32E0B702C2756AD4C7F66020E61C39373AA250EA5D573",
+      "size": 45610707
+    },
+    "arm64": {
+      "url": "https://github.com/grape-kit/grapekit/releases/download/keep-awake-v1.0.1/KeepAwake-Setup-1.0.1-arm64.exe",
+      "sha256": "9998943112F5082F993F77051050D7042E44DC2C1547702F26A42AA7CD407962",
+      "size": 41171880
+    },
+    "x86": {
+      "url": "https://github.com/grape-kit/grapekit/releases/download/keep-awake-v1.0.1/KeepAwake-Setup-1.0.1-x86.exe",
+      "sha256": "9B7248E6F7C5F6E8F09521C9110C7A518ECAD503F1FD941B7F2DB3C5DCE16AA8",
+      "size": 40836728
+    }
+  }
+}
