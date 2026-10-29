@@ -6,3 +6,18 @@ dist/
 tools/node_modules/
 tools/*preview*.png
 apps/*/packaging/ekran-goruntuleri/
+
+# Yalnızca bilgisayarda kalır, GitHub'a gönderilmez: tanıtım görselleri, Store ve site içerikleri, simge kaynakları
+apps/*/screenshots/
+apps/*/packaging/
+apps/*/SITE-ICERIGI.md
+apps/*/site-icerigi.html
+apps/*/site-content.mjs
+apps/*/GIZLILIK.md
+apps/*/brand/icon-*.png
+apps/*/brand/icon.svg
+apps/*/brand/icon-art*.svg
+apps/CapsLock/yayinla.ps1
+tools/make-store-shots.mjs
+tools/site-content.mjs
+docs/
