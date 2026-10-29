@@ -228,10 +228,17 @@ async function runBatch(folder, opts) {
   st.textContent = t('batch.done', { ok, fail: errors.length });
 }
 
-/** Komut satırından (Gezgin menüsü): pencere açmadan PDF. */
-export async function cliToPdf(input, output) {
+/** Komut satırından (Gezgin menüsü ve betikler): pencere açmadan dönüştürür. format: pdf | html | docx | png */
+export async function cliConvert(input, output, format = 'pdf') {
   const r = await call('file.read', { path: input });
+  const src = r.text.replace(/\r\n?/g, '\n');
   const dir = dirName(input);
   const tab = { path: input, docDir: dir, docBase: await call('docbase', { dir }) };
-  await writePdf(r.text.replace(/\r\n?/g, '\n'), tab, app.settings.pdf, output || input.replace(/\.[^.\\/]+$/, '.pdf'));
+  const target = output || input.replace(/\.[^.\\/]+$/, '.' + format);
+  const title = docTitle(tab, src);
+  if (format === 'pdf') await writePdf(src, tab, app.settings.pdf, target);
+  else if (format === 'html') await call('file.write', { path: target, text: await buildHtml(src, { ...ctx(tab), theme: app.settings.html.theme, embed: true, embedFonts: true, title }), encoding: 'utf-8', bom: false });
+  else if (format === 'docx') await call('file.writeBase64', { path: target, data: await buildDocx(src, { docDir: dir, title }) });
+  else if (format === 'png') await call('png.export', { html: await buildHtml(src, { ...ctx(tab), theme: app.settings.png.theme, title }), path: target, width: app.settings.png.width, scale: app.settings.png.scale, docDirs: [dir] });
+  else throw new Error('Bilinmeyen biçim: ' + format);
 }

@@ -412,13 +412,13 @@ internal sealed partial class MainForm
     };
 
     // ===================== Komut satırı: --to-pdf =====================
-    public async Task<string?> ConvertToPdf(string input, string? output)
+    public async Task<string?> ConvertToPdf(string input, string? output, string format = "pdf")
     {
         await WhenReady;
         var id = Guid.NewGuid().ToString("N");
         var tcs = new TaskCompletionSource<string?>();
         _cli[id] = tcs;
-        Emit("cli-pdf", new JsonObject { ["input"] = input, ["output"] = output, ["id"] = id });
+        Emit("cli-pdf", new JsonObject { ["input"] = input, ["output"] = output, ["id"] = id, ["format"] = format });
         return await tcs.Task.WaitAsync(TimeSpan.FromMinutes(3));
     }
 }

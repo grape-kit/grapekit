@@ -134,7 +134,7 @@
 /* Ön bilgi kartı ve içindekiler */
 .md .front-matter { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px 18px; padding: 12px 16px; margin: 0 0 1.4em; border: 1px solid var(--md-line); border-radius: 10px; background: var(--md-code-bg); font-size: .85em; }
 .md .front-matter div { min-width: 0; }
-.md .front-matter dt { margin: 0; font-weight: 600; color: var(--md-muted); font-size: .8em; text-transform: uppercase; letter-spacing: .05em; }
+.md .front-matter dt { margin: 0; font-weight: 600; color: var(--md-muted); font-size: .8em; letter-spacing: .02em; }
 .md .front-matter dd { margin: 0; overflow: hidden; text-overflow: ellipsis; }
 .md .toc, .toc { display: flex; flex-direction: column; gap: 2px; margin: 0 0 1.2em; padding: .8em 1em; border: 1px solid var(--md-line); border-radius: 10px; font-size: .95em; }
 .toc a { color: var(--md-ink-2); text-decoration: none; padding: 2px 0; }

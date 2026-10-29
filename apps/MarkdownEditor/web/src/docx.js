@@ -84,6 +84,34 @@ export async function buildDocx(src, o = {}) {
     (res || []).forEach((png, i) => { if (png) { const bytes = b64ToBytes(png.data); caps[i].tk._img = { bytes, size: fit({ w: png.w, h: png.h }, MAXW, png.dpr || 2) }; } });
   }
 
+  // 1b) Görev kutuları ve uyarı kutuları (önizlemedeki gibi)
+  const ALERT = { NOTE: ['Not', 'Note', '0969DA'], TIP: ['İpucu', 'Tip', '1A7F37'], IMPORTANT: ['Önemli', 'Important', '8250DF'], WARNING: ['Uyarı', 'Warning', '9A6700'], CAUTION: ['Dikkat', 'Caution', 'CF222E'] };
+  for (let i = 0; i < tokens.length; i++) {
+    const tk = tokens[i];
+    if (tk.type === 'inline' && tokens[i - 2]?.type === 'list_item_open') {
+      const m = /^\[([ xX])\][  ]/.exec(tk.content);
+      if (m && tk.children?.[0]?.type === 'text') {
+        tk.children[0].content = tk.children[0].content.slice(4);
+        tk.children.unshift(Object.assign(new tk.constructor('html_inline', '', 0), { content: `<input type="checkbox"${m[1] !== ' ' ? ' checked' : ''}>` }));
+      }
+    }
+    if (tk.type === 'blockquote_open' && tokens[i + 2]?.type === 'inline') {
+      const m = /^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*/i.exec(tokens[i + 2].content);
+      if (m) {
+        const k = m[1].toUpperCase();
+        tk._alert = ALERT[k];
+        const inl = tokens[i + 2];
+        if (inl.children?.[0]?.type === 'text') inl.children[0].content = inl.children[0].content.replace(/^\[![A-Za-z]+\]\s*/, '');
+        while (inl.children?.[0] && (inl.children[0].type === 'softbreak' || (inl.children[0].type === 'text' && !inl.children[0].content))) inl.children.shift();
+      }
+    }
+  }
+  const tocList = () => {
+    const hs = [];
+    for (let i = 0; i < tokens.length; i++) if (tokens[i].type === 'heading_open' && +tokens[i].tag.slice(1) <= 3) hs.push({ level: +tokens[i].tag.slice(1), text: tokens[i + 1].content });
+    return hs;
+  };
+
   // 2) Görseller
   const images = new Map();
   for (const tk of tokens) for (const c of tk.children || []) if (c.type === 'image') {
@@ -164,6 +192,7 @@ export async function buildDocx(src, o = {}) {
   const lists = []; // { ordered, instance }
   let listInstance = 0;
   let quote = 0;
+  const alertColor = [];
   let pendingTask = null;
   const HEAD = [HeadingLevel.HEADING_1, HeadingLevel.HEADING_2, HeadingLevel.HEADING_3, HeadingLevel.HEADING_4, HeadingLevel.HEADING_5, HeadingLevel.HEADING_6];
 
@@ -174,7 +203,7 @@ export async function buildDocx(src, o = {}) {
       if (!l.used) { p.numbering = { reference: l.ordered ? 'numbers' : 'bullets', level: Math.min(lists.length - 1, 8), instance: l.instance }; l.used = true; }
       else p.indent = { left: 720 * lists.length };
     }
-    if (quote) { p.indent = { left: 567 * quote }; p.border = { left: { style: BorderStyle.SINGLE, size: 18, color: 'C4B5FD', space: 12 } }; }
+    if (quote) { p.indent = { left: 567 * quote }; p.border = { left: { style: BorderStyle.SINGLE, size: 18, color: alertColor[alertColor.length - 1] || 'C4B5FD', space: 12 } }; }
     return p;
   };
 
@@ -199,15 +228,28 @@ export async function buildDocx(src, o = {}) {
         const inline = tokens[i + 1];
         const only = inline.children?.length === 1 && inline.children[0];
         if (only && only.type === 'html_inline' && /pagebreak|page-break/i.test(only.content)) { target.push(new Paragraph({ children: [new PageBreak()] })); i += 2; break; }
-        target.push(new Paragraph({ ...paraProps(), spacing: { after: lists.length ? 60 : 160 }, children: runs(inline.children, { i: quote ? true : undefined }) }));
+        if (/^\s*(\[TOC\]|\[\[_TOC_\]\]|\[İÇİNDEKİLER\])\s*$/i.test(inline.content)) {
+          for (const hh of tocList()) target.push(new Paragraph({ indent: { left: 360 * (hh.level - 1) }, spacing: { after: 40 }, children: [new InternalHyperlink({ anchor: slugify(hh.text), children: [new TextRun({ text: hh.text, style: 'Hyperlink' })] })] }));
+          target.push(new Paragraph({ spacing: { after: 200 } }));
+          i += 2; break;
+        }
+        target.push(new Paragraph({ ...paraProps(), spacing: { after: lists.length ? 60 : 160 }, children: runs(inline.children, { i: quote && !alertColor[alertColor.length - 1] ? true : undefined }) }));
         i += 2; break;
       }
       case 'bullet_list_open': lists.push({ ordered: false, instance: ++listInstance }); break;
       case 'ordered_list_open': lists.push({ ordered: true, instance: ++listInstance }); break;
       case 'bullet_list_close': case 'ordered_list_close': lists.pop(); break;
       case 'list_item_open': if (lists.length) lists[lists.length - 1].used = false; break;
-      case 'blockquote_open': quote++; break;
-      case 'blockquote_close': quote--; break;
+      case 'blockquote_open':
+        quote++;
+        if (tk._alert) {
+          const [tr, en, color] = tk._alert;
+          target.push(new Paragraph({ indent: { left: 567 * quote }, border: { left: { style: BorderStyle.SINGLE, size: 18, color, space: 12 } }, spacing: { after: 40 },
+            children: [new TextRun({ text: o.lang === 'en' ? en : tr, bold: true, color })] }));
+          alertColor.push(color);
+        } else alertColor.push(null);
+        break;
+      case 'blockquote_close': quote--; alertColor.pop(); break;
       case 'hr': target.push(new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: 'D9D3E8', space: 1 } }, spacing: { after: 200 } })); break;
       case 'fence': case 'code_block': case 'math_block': {
         if (tk._img) { target.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 120, after: 160 }, children: [new ImageRun({ type: 'png', data: tk._img.bytes, transformation: tk._img.size })] })); break; }

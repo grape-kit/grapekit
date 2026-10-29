@@ -25,6 +25,10 @@ export function slugify(s) {
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const ALERTS = { NOTE: 'note', TIP: 'tip', IMPORTANT: 'important', WARNING: 'warning', CAUTION: 'caution' };
 
+// Ön bilgi kartındaki bilinen alanların görünen adları (dile göre setMetaLabels ile değişir)
+let metaLabels = { title: 'Başlık', author: 'Yazar', date: 'Tarih', tags: 'Etiketler', description: 'Açıklama', subtitle: 'Alt başlık', version: 'Sürüm', lang: 'Dil', category: 'Kategori', keywords: 'Anahtar kelimeler' };
+export function setMetaLabels(m) { metaLabels = m; }
+
 let alertTitles = { note: 'Not', tip: 'İpucu', important: 'Önemli', warning: 'Uyarı', caution: 'Dikkat' };
 export function setAlertTitles(t) { alertTitles = t; }
 
@@ -155,7 +159,7 @@ function tocHtml(hs) {
 function metaCard(meta) {
   if (!meta || meta._error) return '';
   const rows = Object.entries(meta).filter(([, v]) => v != null && typeof v !== 'object' || Array.isArray(v))
-    .map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(Array.isArray(v) ? v.join(', ') : v)}</dd></div>`).join('');
+    .map(([k, v]) => `<div><dt>${esc(metaLabels[k.toLowerCase()] || k)}</dt><dd>${esc(Array.isArray(v) ? v.join(', ') : v)}</dd></div>`).join('');
   return rows ? `<dl class="front-matter" data-line="0">${rows}</dl>` : '';
 }
 

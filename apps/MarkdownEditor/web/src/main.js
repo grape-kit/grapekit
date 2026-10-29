@@ -7,7 +7,7 @@ import { icon } from './icons.js';
 import { toast, showMenu, esc, ask } from './ui.js';
 import { createEditor, reconfigure, setPlaceholder, toggleTask, insertSnippet, EditorView } from './editor.js';
 import { paint, lineMap, lineToY, yToLine } from './preview.js';
-import { stats, setAlertTitles } from './render.js';
+import { stats, setAlertTitles, setMetaLabels } from './render.js';
 import { def, run, registerEditing, editorKeymap, buildMenubar, buildToolbar, refreshToolbarState, handleKey, bindKeys, commands } from './commands.js';
 import * as docs from './docs.js';
 import * as dlg from './dialogs.js';
@@ -18,6 +18,10 @@ import { TEMPLATES, CHEATSHEET, templateText } from './templates.js';
 import { htmlToMarkdown, isRichHtml } from './importer.js';
 
 const $ = (s) => document.querySelector(s);
+const META = {
+  tr: { title: 'Başlık', author: 'Yazar', date: 'Tarih', tags: 'Etiketler', description: 'Açıklama', subtitle: 'Alt başlık', version: 'Sürüm', lang: 'Dil', category: 'Kategori', keywords: 'Anahtar kelimeler' },
+  en: { title: 'Title', author: 'Author', date: 'Date', tags: 'Tags', description: 'Description', subtitle: 'Subtitle', version: 'Version', lang: 'Language', category: 'Category', keywords: 'Keywords' },
+};
 const ui = {};
 
 // ===================== Ayarlar =====================
@@ -462,6 +466,7 @@ function buildChrome() {
 }
 function refreshChrome() { refreshToolbarState($('.toolbar')); for (const b of document.querySelectorAll('.tb-seg button')) b.setAttribute('aria-checked', String(b.dataset.cmd === 'view.' + app.settings.viewMode)); }
 function relabel() {
+  setMetaLabels(META[getLang()]);
   setAlertTitles({ note: t('alert.note'), tip: t('alert.tip'), important: t('alert.important'), warning: t('alert.warning'), caution: t('alert.caution') });
   buildChrome(); relabelSide(); drawTabs(); drawStatus(); setPlaceholder(app.view, t('editor.placeholder')); if (!app.active) drawWelcome(); renderSoon(0);
   call('app.lang', { lang: getLang() });
@@ -494,6 +499,7 @@ async function boot() {
   if (!app.settings.lang) app.settings.lang = app.info.lang || 'tr';
   if (!app.info.lang) app.info.lang = app.settings.lang;
   setLang(app.settings.lang);
+  setMetaLabels(META[getLang()]);
   setAlertTitles({ note: t('alert.note'), tip: t('alert.tip'), important: t('alert.important'), warning: t('alert.warning'), caution: t('alert.caution') });
 
   Object.assign(ui, { workspace: $('.workspace'), preview: $('.preview'), previewPane: $('.preview-pane'), tabs: $('.tabs'), status: $('.statusbar'), welcome: $('.welcome') });
@@ -572,8 +578,8 @@ async function boot() {
     if (b) { b.title = t(maximized ? 'win.restore' : 'win.max'); b.innerHTML = maximized ? '<svg viewBox="0 0 10 10"><rect x="2.5" y=".5" width="7" height="7"/><path d="M.5 2.5v7h7"/></svg>' : '<svg viewBox="0 0 10 10"><rect x=".5" y=".5" width="9" height="9"/></svg>'; }
   });
   onHost('update-status', (r) => { Object.assign(app.info, r); if (r.updateAvailable && r.notify) toast(r.updateStatus, { actions: [{ label: t('cmd.help.updates'), run: () => settingsDialog(applySetting, 'about') }], timeout: 10000 }); });
-  onHost('cli-pdf', async ({ input, output, id }) => {
-    try { await xp.cliToPdf(input, output); call('cli.done', { id, ok: true }); } catch (e) { call('cli.done', { id, ok: false, error: e.message }); }
+  onHost('cli-pdf', async ({ input, output, id, format }) => {
+    try { await xp.cliConvert(input, output, format || 'pdf'); call('cli.done', { id, ok: true }); } catch (e) { call('cli.done', { id, ok: false, error: e.message || String(e) }); }
   });
   onHost('recent', (list) => { recentCache = list || []; });
 

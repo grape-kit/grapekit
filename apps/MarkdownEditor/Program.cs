@@ -11,7 +11,7 @@ internal static class Program
     static readonly string MutexName = @"Local\MarkdownEditor.Tekil" + Suffix;
     static readonly string PipeName = "Grapekit.MarkdownEditor" + Suffix;
 
-    sealed record Request(string[] Files, string? PdfInput, string? PdfOutput);
+    sealed record Request(string[] Files, string? PdfInput, string? PdfOutput, string Format = "pdf");
 
     [STAThread]
     static int Main(string[] args)
@@ -21,8 +21,10 @@ internal static class Program
 
         if (args.Contains("--unregister")) { Shell.Unregister(); return 0; }
 
-        string? pdfIn = null, pdfOut = null;
-        int toPdf = Array.IndexOf(args, "--to-pdf");
+        // Komut satırından dönüştürme: --to-pdf | --to-html | --to-docx | --to-png  girdi.md [çıktı]
+        string? pdfIn = null, pdfOut = null, format = "pdf";
+        int toPdf = -1;
+        foreach (var f in new[] { "pdf", "html", "docx", "png" }) { int i = Array.IndexOf(args, "--to-" + f); if (i >= 0) { toPdf = i; format = f; break; } }
         if (toPdf >= 0 && toPdf + 1 < args.Length) { pdfIn = Path.GetFullPath(args[toPdf + 1]); if (toPdf + 2 < args.Length && !args[toPdf + 2].StartsWith("--")) pdfOut = Path.GetFullPath(args[toPdf + 2]); }
         var files = toPdf >= 0 ? [] : args.Where(a => !a.StartsWith("--") && File.Exists(a)).Select(Path.GetFullPath).ToList();
 
@@ -30,7 +32,7 @@ internal static class Program
         if (!first)
         {
             // Zaten açık: isteği çalışan kopyaya ilet
-            var reply = Send(new Request([.. files], pdfIn, pdfOut));
+            var reply = Send(new Request([.. files], pdfIn, pdfOut, format));
             if (reply == null && pdfIn == null) return 0;
             return reply == "ok" || reply == null ? 0 : 1;
         }
@@ -46,7 +48,7 @@ internal static class Program
             form.Opacity = 0; form.ShowInTaskbar = false;
             form.Shown += async (_, _) =>
             {
-                var err = await form.ConvertToPdf(pdfIn, pdfOut);
+                var err = await form.ConvertToPdf(pdfIn, pdfOut, format);
                 if (err != null) MessageBox.Show(err, GrapekitApp.Name, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 Environment.ExitCode = err == null ? 0 : 1;
                 form.ForceClose();
@@ -99,7 +101,7 @@ internal static class Program
                     {
                         if (r.PdfInput != null)
                         {
-                            var task = (Task<string?>)form.Invoke(() => form.ConvertToPdf(r.PdfInput, r.PdfOutput));
+                            var task = (Task<string?>)form.Invoke(() => form.ConvertToPdf(r.PdfInput, r.PdfOutput, r.Format));
                             var err = task.GetAwaiter().GetResult();
                             answer = err == null ? "ok" : "error: " + err;
                         }
