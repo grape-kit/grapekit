@@ -1,0 +1,68 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <ApplicationIcon>brand\app.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AssemblyName>Formaty</AssemblyName>
+    <RootNamespace>Formaty</RootNamespace>
+
+    <Product>Formaty</Product>
+    <AssemblyTitle>Formaty</AssemblyTitle>
+    <Version>1.0.0</Version>
+    <NoWarn>$(NoWarn);MSB3277</NoWarn>
+    <!-- Yerel kütüphanelerin mimarisi: yayında -r ile, geliştirmede x64 -->
+    <EngineArch Condition="'$(RuntimeIdentifier)' == 'win-arm64'">arm64</EngineArch>
+    <EngineArch Condition="'$(EngineArch)' == ''">x64</EngineArch>
+    <PlatformTarget Condition="'$(RuntimeIdentifier)' == ''">x64</PlatformTarget>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\core\Grapekit.Core\Grapekit.Core.csproj" />
+    <Using Include="Grapekit" />
+    <Using Include="Grapekit.Ui" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="packaging\**;dist\**;web\**;engine-bin\**" />
+    <Compile Remove="packaging\**;dist\**;web\**;engine-bin\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4314.35" />
+    <!-- Fotoğraf: libvips (LGPL, ayrı DLL) + NetVips (MIT) -->
+    <PackageReference Include="NetVips" Version="3.2.0" />
+    <PackageReference Include="NetVips.Native.win-$(EngineArch)" Version="8.18.7" />
+    <!-- PDF: PdfSharp (MIT) düzenleme; görsele çevirme PDFium (Apache-2/BSD) ile -->
+    <!-- DİKKAT: 6.5.0 ve sonrası AGPL/ücretli lisansa geçti. 6.2.4 son MIT sürüm; yükseltilmemeli. -->
+    <PackageReference Include="PDFsharp" Version="[6.2.4]" />
+  </ItemGroup>
+
+  <!-- Motorlar: FFmpeg (LGPL, ayrı exe/DLL) ve PDFium. tools\get-engines.ps1 engine-bin\<mimari>\ klasörüne indirir; çıktıda engines\ -->
+  <ItemGroup>
+    <Content Include="engine-bin\$(EngineArch)\**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" Link="engines\%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <!-- Arayüz (web\wwwroot) çıktının yanına wwwroot olarak kopyalanır. tools\build-app.ps1 arayüzü önceden derler. -->
+  <PropertyGroup>
+    <WebReady Condition="Exists('web\wwwroot\app.js')">true</WebReady>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(WebReady)' == 'true'">
+    <Content Include="web\wwwroot\**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" Link="wwwroot\%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+  <Target Name="BuildWeb" BeforeTargets="AssignTargetPaths" Condition="'$(SkipWeb)' != 'true' And '$(WebReady)' != 'true'">
+    <Exec Command="npm ci --no-audit --no-fund" WorkingDirectory="web" Condition="!Exists('web\node_modules')" />
+    <Exec Command="npm run build" WorkingDirectory="web" />
+    <ItemGroup>
+      <Content Include="web\wwwroot\**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" Link="wwwroot\%(RecursiveDir)%(Filename)%(Extension)" />
+    </ItemGroup>
+  </Target>
+
+  <!-- Kurulumu küçült: WinForms kullanıldığı için WPF kütüphanesi ve belge XML'leri gerekmez -->
+  <Target Name="TrimPublish" AfterTargets="Publish">
+    <Delete Files="$(PublishDir)Microsoft.Web.WebView2.Wpf.dll;$(PublishDir)Microsoft.Web.WebView2.Wpf.xml;$(PublishDir)Microsoft.Web.WebView2.Core.xml;$(PublishDir)Microsoft.Web.WebView2.WinForms.xml" />
+  </Target>
+
+</Project>
