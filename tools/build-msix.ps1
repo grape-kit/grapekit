@@ -93,6 +93,8 @@ if ($meta.webview2 -and (Test-Path (Join-Path $web 'package.json'))) {
     } finally { Pop-Location }
 }
 
+if ($meta.engines) { & (Join-Path $PSScriptRoot 'get-engines.ps1') -Archs $Archs; if (-not $?) { throw "Motorlar indirilemedi" } }
+
 foreach ($arch in $Archs) {
     Write-Host "`n-- ${arch}: derleniyor" -ForegroundColor Yellow
     $layout = Join-Path $out "layout\$arch"

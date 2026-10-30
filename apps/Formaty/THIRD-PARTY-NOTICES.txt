@@ -1,0 +1,56 @@
+Formaty — Üçüncü taraf bileşenler / Third-party components
+=========================================================
+
+Formaty'nin kendi kaynak kodu MIT lisanslıdır: https://github.com/grape-kit/grapekit
+Formaty's own source code is MIT licensed: https://github.com/grape-kit/grapekit
+
+Formaty aşağıdaki açık kaynak bileşenleri kullanır. Bu bileşenler değiştirilmeden, ayrı dosyalar
+(DLL/EXE) olarak dağıtılır; LGPL lisanslı kütüphaneleri aynı arayüze sahip kendi derlemelerinizle
+değiştirebilirsiniz. Kaynak kodlarına aşağıdaki adreslerden ulaşabilirsiniz.
+
+Formaty uses the following open-source components. They are distributed unmodified as separate
+files (DLL/EXE); you may replace the LGPL-licensed libraries with your own builds that expose the
+same interface. Their source code is available at the addresses below.
+
+
+FFmpeg (engines\ffmpeg.exe, engines\ffprobe.exe, engines\*.dll)
+  Lisans / License: GNU Lesser General Public License v3 or later (LGPL-3.0-or-later)
+  GPL bileşen içermeyen "lgpl-shared" derlemesi / "lgpl-shared" build without GPL components
+  Kaynak / Source: https://ffmpeg.org/download.html · https://github.com/FFmpeg/FFmpeg
+  Derleme betikleri / Build scripts: https://github.com/BtbN/FFmpeg-Builds
+  Ayrıntılı lisans metni / Full license text: engines\FFMPEG-LICENSE.txt
+  FFmpeg is a trademark of Fabrice Bellard, originator of the FFmpeg project.
+
+libvips (libvips-42.dll)
+  Lisans / License: GNU Lesser General Public License v2.1 or later (LGPL-2.1-or-later)
+  Kaynak / Source: https://github.com/libvips/libvips · https://github.com/libvips/build-win64-mxe
+  libvips ile birlikte gelen kütüphaneler (libjpeg-turbo, libpng, libwebp, libheif, libaom, librsvg,
+  cairo, pango, glib, lcms2, libtiff, zlib, expat, fontconfig, freetype, harfbuzz, pixman, cgif ve
+  diğerleri) kendi izin veren / LGPL lisanslarıyla dağıtılır; ayrıntılar libvips derleme deposundadır.
+
+NetVips
+  Lisans / License: MIT — https://github.com/kleisauke/net-vips
+
+PDFium (engines\pdfium.dll)
+  Lisans / License: BSD-3-Clause and Apache-2.0
+  Kaynak / Source: https://pdfium.googlesource.com/pdfium · https://github.com/bblanchon/pdfium-binaries
+  Ayrıntılı lisans metni / Full license text: engines\PDFIUM-LICENSE.txt
+
+PDFsharp 6.2.4
+  Lisans / License: MIT — https://github.com/empira/PDFsharp
+
+Microsoft Edge WebView2 SDK
+  Lisans / License: BSD-3-Clause — https://www.nuget.org/packages/Microsoft.Web.WebView2
+
+Bricolage Grotesque, Figtree (yazı tipleri / fonts)
+  Lisans / License: SIL Open Font License 1.1
+
+.NET Runtime
+  Lisans / License: MIT — https://github.com/dotnet/runtime
+
+
+Kaynak kodu talebi / Source code request
+  LGPL kapsamındaki bileşenlerin tam kaynak kodunu yukarıdaki adreslerden indirebilir ya da
+  https://grapekit.com/geri-bildirim adresinden isteyebilirsiniz.
+  You can download the complete source of the LGPL components from the addresses above or request
+  it via https://grapekit.com/en/feedback

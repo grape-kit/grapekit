@@ -42,6 +42,9 @@ if ($meta.webview2 -and (Test-Path (Join-Path $web 'package.json'))) {
     } finally { Pop-Location }
 }
 
+# Ayrı dönüştürme motorları olan uygulamalar (Formaty): FFmpeg ve PDFium'u indir
+if ($meta.engines) { & (Join-Path $PSScriptRoot 'get-engines.ps1') -Archs $Archs; if (-not $?) { throw "Motorlar indirilemedi" } }
+
 foreach ($arch in $Archs) {
     Write-Host "`n-- ${arch}: derleniyor" -ForegroundColor Yellow
     $pub = Join-Path $dist "publish\$arch"
@@ -54,6 +57,7 @@ foreach ($arch in $Archs) {
     $extra = @()
     if ($meta.webview2) { $extra += "/DWebView2=1" }
     if ($meta.kind -eq 'desktop') { $extra += "/DDesktopApp=1" }
+    if ($meta.engines) { $extra += "/DLargeApp=1" }
     & $iscc /Q "/DAppId=$($meta.id)" "/DAppName=$($meta.name.tr)" "/DAppNameEn=$($meta.name.en)" "/DAppNameDe=$($meta.name.de)" `
         "/DAppExe=$($meta.exe)" "/DAppGuid={$($meta.guid)}" "/DAppMutex=$($meta.mutex)" "/DPageUrl=$page" `
         "/DAppIcon=$(Join-Path $brand 'app.ico')" "/DAppSmallImage=$(Join-Path $brand 'wizard-small.bmp')" "/DAppSmallImage2x=$(Join-Path $brand 'wizard-small-2x.bmp')" `

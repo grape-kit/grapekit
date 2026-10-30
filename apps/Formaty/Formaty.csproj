@@ -40,6 +40,15 @@
     <PackageReference Include="PDFsharp" Version="[6.2.4]" />
   </ItemGroup>
 
+  <!-- Kurulumu küçült: Windows SDK projeksiyonu önceden derlenince iki katına çıkıyor; açılışa katkısı yok -->
+  <ItemGroup>
+    <PublishReadyToRunExclude Include="Microsoft.Windows.SDK.NET.dll" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="THIRD-PARTY-NOTICES.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <!-- Motorlar: FFmpeg (LGPL, ayrı exe/DLL) ve PDFium. tools\get-engines.ps1 engine-bin\<mimari>\ klasörüne indirir; çıktıda engines\ -->
   <ItemGroup>
     <Content Include="engine-bin\$(EngineArch)\**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" Link="engines\%(RecursiveDir)%(Filename)%(Extension)" />

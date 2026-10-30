@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob: https://thumb.grapekit.local; style-src 'self' 'unsafe-inline'; font-src 'self' data:; script-src 'self'; connect-src 'self'; frame-src 'none'; object-src 'none'">
+<title>Formaty</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body data-view="home">
+<div id="app">
+  <header class="titlebar">
+    <div class="tb-brand"><img src="icon.png" alt="" width="22" height="22"><b>Formaty</b></div>
+    <nav class="tb-nav" aria-label="Görünüm" data-i18n-aria="aria.nav"></nav>
+    <div class="tb-drag"></div>
+    <button type="button" class="tb-settings icon-btn"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></button>
+    <div class="winctl">
+      <button type="button" data-win="min" data-i18n-title="win.min"><svg viewBox="0 0 10 10"><path d="M0 5h10"/></svg></button>
+      <button type="button" data-win="max" data-i18n-title="win.max"><svg viewBox="0 0 10 10"><rect x=".5" y=".5" width="9" height="9"/></svg></button>
+      <button type="button" data-win="close" class="close" data-i18n-title="win.close"><svg viewBox="0 0 10 10"><path d="M0 0l10 10M10 0L0 10"/></svg></button>
+    </div>
+  </header>
+  <main class="view" id="home"></main>
+  <main class="view work" id="work"></main>
+</div>
+<div class="drop-overlay" hidden><div><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M17 8l-5-5-5 5M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg><b data-i18n="drop.here"></b></div></div>
+<div class="layer" id="layer"></div>
+<script type="module" src="app.js"></script>
+</body>
+</html>

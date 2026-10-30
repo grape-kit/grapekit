@@ -54,7 +54,12 @@ WizardImageStretch=yes
 WizardImageBackColor=$330B1A
 Compression=lzma2/ultra64
 SolidCompression=yes
+#ifdef LargeApp
+; Büyük motor dosyaları (Formaty): 32 bit derleyicinin belleği yetsin diye tek iş parçacığı
+LZMANumBlockThreads=1
+#else
 LZMANumBlockThreads=4
+#endif
 WizardStyle=modern
 WizardSizePercent=110
 MinVersion=10.0.17763
