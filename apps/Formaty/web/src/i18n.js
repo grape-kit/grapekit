@@ -176,6 +176,28 @@ const S = {
   'about.licenses': ['Açık kaynak lisansları', 'Open-source licenses'],
   'about.engines': ['Dönüştürme motorları: FFmpeg (LGPL), libvips (LGPL), PDFium (BSD), PDFsharp (MIT).', 'Engines: FFmpeg (LGPL), libvips (LGPL), PDFium (BSD), PDFsharp (MIT).'],
 
+  // Hazır ayarlar, tahmin, bildirim
+  'pre.title': ['Hazır ayarlar', 'Presets'], 'pre.builtin': ['Hazır', 'Built-in'], 'pre.mine': ['Benim ayarlarım', 'My presets'],
+  'pre.save': ['Bu ayarları kaydet…', 'Save these settings…'], 'pre.delete': ['Sil', 'Delete'],
+  'pre.saveTitle': ['Hazır ayar olarak kaydet', 'Save as preset'], 'pre.nameL': ['Ad', 'Name'], 'pre.namePh': ['Örnek: Blog için {fmt}', 'Example: {fmt} for my blog'],
+  'pre.saved': ['"{name}" kaydedildi.', '"{name}" saved.'], 'pre.deleted': ['"{name}" silindi.', '"{name}" deleted.'], 'pre.applied': ['"{name}" uygulandı.', '"{name}" applied.'],
+  'pre.webWebp': ['Web sitesi için WebP (1920 px)', 'WebP for websites (1920 px)'],
+  'pre.instagram': ['Instagram (1080 px JPG)', 'Instagram (1080 px JPG)'],
+  'pre.mailPhoto': ['E-posta için fotoğraf (1600 px)', 'Photos for email (1600 px)'],
+  'pre.shotPng': ['Küçük ekran görüntüsü (PNG paleti)', 'Small screenshot (PNG palette)'],
+  'pre.whatsapp': ['WhatsApp videosu (16 MB, 720p)', 'WhatsApp video (16 MB, 720p)'],
+  'pre.discord': ['Discord videosu (10 MB)', 'Discord video (10 MB)'],
+  'pre.youtube': ['YouTube yüklemesi (1080p, yüksek)', 'YouTube upload (1080p, high)'],
+  'pre.podcast': ['Podcast MP3 (mono, 96 kbps, −16 LUFS)', 'Podcast MP3 (mono, 96 kbps, −16 LUFS)'],
+  'pre.flac': ['Müzik arşivi (FLAC, en sıkı)', 'Music archive (FLAC, max compression)'],
+  'pre.ringtone': ['Zil sesi (ilk 30 sn, M4A)', 'Ringtone (first 30 s, M4A)'],
+  'est.size': ['Tahmini çıktı ≈ {out} (şu an {in})', 'Estimated output ≈ {out} (now {in})'],
+  'est.max': ['Çıktı en fazla {out} (şu an {in})', 'Output at most {out} (now {in})'],
+  'eta.sec': ['· yaklaşık {n} sn kaldı', '· about {n} s left'], 'eta.min': ['· yaklaşık {n} dk kaldı', '· about {n} min left'],
+  'eta.hour': ['· yaklaşık {h} sa {m} dk kaldı', '· about {h} h {m} min left'],
+  'notify.done': ['Formaty: dönüştürme bitti', 'Formaty: conversion finished'], 'notify.partial': ['Formaty: bazı dosyalarda hata var', 'Formaty: some files failed'],
+  'o.keepCover': ['Albüm kapağını koru', 'Keep album cover'], 'o.keepCoverD': ['Kaynakta kapak görseli varsa yeni dosyaya da eklenir.', 'If the source has cover art, it\'s added to the new file.'],
+
   // Tur
   'tour.next': ['İleri', 'Next'], 'tour.back': ['Geri', 'Back'], 'tour.skip': ['Geç', 'Skip'], 'tour.done': ['Başla', 'Get started'],
   'tour.drop': ['Dosyaları bırakın', 'Drop your files'], 'tour.dropD': ['Fotoğraf, video, ses ya da PDF; tek dosya ya da bütün bir klasör. Kısayol: <kbd>Ctrl+O</kbd>', 'Images, video, audio or PDF; one file or a whole folder. Shortcut: <kbd>Ctrl+O</kbd>'],

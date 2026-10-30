@@ -70,7 +70,7 @@ export const DEFAULT_OPTS = {
   },
   audio: {
     quality: 'high', mode: 'cbr', kbps: 0, vbr: 2, sampleRate: 0, channels: 'keep', bits: 16, compression: 5, normalize: 0, volumeDb: 0,
-    trimSilence: false, start: 0, end: 0, speed: 1, combine: false,
+    trimSilence: false, start: 0, end: 0, speed: 1, combine: false, keepCover: true,
   },
   pdf: {
     imageFormat: 'jpg', dpi: 150, pages: '', quality: 88, mode: 'each', every: 1, ranges: '', level: 'balanced', name: '',
@@ -97,7 +97,7 @@ export function buildRequest(t, o) {
       return { op: 'convert', format: fmt, options: opts };
     }
     case 'audio': {
-      const opts = pick(['quality', 'mode', 'kbps', 'vbr', 'sampleRate', 'channels', 'bits', 'compression', 'normalize', 'volumeDb', 'trimSilence', 'start', 'end', 'speed']);
+      const opts = pick(['quality', 'mode', 'kbps', 'vbr', 'sampleRate', 'channels', 'bits', 'compression', 'normalize', 'volumeDb', 'trimSilence', 'start', 'end', 'speed', 'keepCover']);
       if (o.combine) return { op: 'concat', format: t.id, options: opts, combine: true };
       return { op: 'convert', format: t.id, options: opts };
     }
@@ -157,4 +157,18 @@ export const TOOLS = [
   { id: 'pdf-img', icon: 'frames', kind: 'pdf', target: 'pdf-img', title: 'tool.pdfImg', sub: 'tool.pdfImgD' },
   { id: 'pdf-compress', icon: 'shrink', kind: 'pdf', target: 'pdf-compress', title: 'tool.pdfCompress', sub: 'tool.pdfCompressD' },
   { id: 'pdf-split', icon: 'scissors', kind: 'pdf', target: 'pdf-split', title: 'tool.pdfSplit', sub: 'tool.pdfSplitD' },
+];
+
+// Yerleşik hazır ayarlar: grup varsayılanlarının üzerine uygulanır (önceki seçimler karışmasın)
+export const BUILTIN_PRESETS = [
+  { id: 'web-webp', name: 'pre.webWebp', target: 'webp', patch: { quality: 80, resize: { mode: 'long', long: 1920 } } },
+  { id: 'insta', name: 'pre.instagram', target: 'jpg', patch: { quality: 90, resize: { mode: 'long', long: 1080 } } },
+  { id: 'mail-photo', name: 'pre.mailPhoto', target: 'jpg', patch: { quality: 75, resize: { mode: 'long', long: 1600 } } },
+  { id: 'shot-png', name: 'pre.shotPng', target: 'png', patch: { palette: true } },
+  { id: 'wa-video', name: 'pre.whatsapp', target: 'mp4', patch: { targetMb: 16, height: 720 } },
+  { id: 'dc-video', name: 'pre.discord', target: 'mp4', patch: { targetMb: 10, height: 720 } },
+  { id: 'yt-video', name: 'pre.youtube', target: 'mp4', patch: { quality: 'high', height: 1080 } },
+  { id: 'podcast', name: 'pre.podcast', target: 'mp3', patch: { quality: 'small', kbps: 96, channels: 'mono', normalize: -16 } },
+  { id: 'music-flac', name: 'pre.flac', target: 'flac', patch: { compression: 8 } },
+  { id: 'ringtone', name: 'pre.ringtone', target: 'aac', patch: { quality: 'balanced', end: 30, normalize: -14 } },
 ];

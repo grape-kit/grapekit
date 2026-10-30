@@ -186,7 +186,12 @@ public static class Media
         var (ss, to) = Trim(o, info);
         if (ss > 0) args.AddRange(["-ss", Ffmpeg.F(ss)]);
         if (to > 0) args.AddRange(["-to", Ffmpeg.F(to)]);
-        args.AddRange(["-i", src, "-map", "0:a:0", "-vn", "-sn", "-dn", "-map_metadata", "0"]);
+        args.AddRange(["-i", src, "-map", "0:a:0"]);
+        // Albüm kapağı: kapak destekleyen hedeflerde (MP3, M4A, FLAC) kapak akışı olduğu gibi kopyalanır
+        bool cover = o.B("keepCover", true) && info.CoverCodec is "mjpeg" or "png" && fmt is "mp3" or "aac" or "alac" or "flac";
+        if (cover) args.AddRange(["-map", "0:v:0", "-c:v", "copy", "-disposition:v:0", "attached_pic"]);
+        else args.Add("-vn");
+        args.AddRange(["-sn", "-dn", "-map_metadata", "0"]);
         double dur = Math.Max(0.01, (to > 0 ? to : info.Duration) - ss);
         var speed = Math.Clamp(o.N("speed", 1), 0.25, 4);
         if (speed != 1) dur /= speed;

@@ -134,7 +134,8 @@ internal sealed partial class MainForm : Form
         base.OnLoad(e);
         try
         {
-            var data = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Grapekit", GrapekitApp.Exe, "WebView2");
+            // Deneme kopyası ayrı veri klasörü kullanır: kurulu kopya açıkken de farklı tarayıcı ayarlarıyla açılabilsin
+            var data = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Grapekit", GrapekitApp.Exe, Program.TestCopy ? "WebView2-Deneme" : "WebView2");
             var browserArgs = "--disable-features=msSmartScreenProtection --enable-features=OverlayScrollbar";
 #if DEBUG
             // Yalnızca geliştirme derlemesi: otomatik testler için uzaktan hata ayıklama kapısı
@@ -295,6 +296,7 @@ internal sealed partial class MainForm : Form
         {
             SystemEvents.UserPreferenceChanged -= OnPreference;
             Engines.Jobs.CancelAll();
+            _notify?.Dispose();
             _updates?.Dispose();
         }
         base.Dispose(disposing);

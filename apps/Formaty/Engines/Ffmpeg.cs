@@ -20,7 +20,7 @@ public static class Ffmpeg
 
     // ---------------- Bilgi ----------------
     public sealed record MediaInfo(double Duration, bool HasVideo, bool HasAudio, int Width, int Height, double Fps, int Rotation,
-        string VideoCodec, string AudioCodec, int Channels, int SampleRate, long Bitrate, string Format);
+        string VideoCodec, string AudioCodec, int Channels, int SampleRate, long Bitrate, string Format, string CoverCodec = "");
 
     public static async Task<MediaInfo> InfoAsync(string path, CancellationToken ct = default)
     {
@@ -42,7 +42,8 @@ public static class Ffmpeg
             v?["codec_name"]?.GetValue<string>() ?? "", a?["codec_name"]?.GetValue<string>() ?? "",
             a?["channels"]?.GetValue<int>() ?? 0, int.TryParse(a?["sample_rate"]?.GetValue<string>(), out var sr) ? sr : 0,
             long.TryParse(j["format"]?["bit_rate"]?.GetValue<string>(), out var br) ? br : 0,
-            j["format"]?["format_name"]?.GetValue<string>() ?? "");
+            j["format"]?["format_name"]?.GetValue<string>() ?? "",
+            streams.FirstOrDefault(x => x?["codec_type"]?.GetValue<string>() == "video" && (x?["disposition"]?["attached_pic"]?.GetValue<int>() ?? 0) == 1)?["codec_name"]?.GetValue<string>() ?? "");
     }
 
     static double? ParseD(JsonNode? n) => n is JsonValue v && v.TryGetValue<string>(out var s) && double.TryParse(s, Inv, out var d) ? d : null;

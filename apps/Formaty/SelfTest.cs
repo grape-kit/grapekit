@@ -103,6 +103,17 @@ internal static class SelfTest
         check("mp3 VBR V2 + mono + 22 kHz", () => Media.ConvertAudioAsync(audio, Path.Combine(outDir, "ses-vbr.mp3"), "mp3", new Opt(new JsonObject { ["mode"] = "vbr", ["vbr"] = 2, ["channels"] = "mono", ["sampleRate"] = 22050 }), ai, _ => { }, ct, pause));
         check("wav 24 bit", () => Media.ConvertAudioAsync(audio, Path.Combine(outDir, "ses-24.wav"), "wav", new Opt(new JsonObject { ["bits"] = 24 }), ai, _ => { }, ct, pause));
         check("videodan ses (mp3)", () => Media.ConvertAudioAsync(video, Path.Combine(outDir, "videodan.mp3"), "mp3", new Opt(null), vi, _ => { }, ct, pause));
+        var withCover = Path.Combine(outDir, "kapakli.mp3");
+        check("kapaklı mp3 üret", () => Ffmpeg.RunAsync(["-i", audio, "-i", photo, "-map", "0:a", "-map", "1:v", "-c:a", "libmp3lame", "-b:a", "128k", "-c:v", "mjpeg", "-vf", "scale=500:-2", "-disposition:v", "attached_pic", "-id3v2_version", "3", "-metadata", "title=Deneme", withCover], 8, null, ct));
+        foreach (var f in new[] { "aac", "flac", "mp3" })
+            check($"kapak korunur → {f}", async () =>
+            {
+                var src = await Ffmpeg.InfoAsync(withCover);
+                var dst = Path.Combine(outDir, "kapak-" + f + "." + Formats.OutExt(f));
+                await Media.ConvertAudioAsync(withCover, dst, f, new Opt(null), src, _ => { }, ct, pause);
+                var r = await Ffmpeg.InfoAsync(dst);
+                if (r.CoverCodec == "") throw new Exception("kapak yok");
+            });
         check("ses birleştirme", () => Media.ConcatAsync([audio, audio], Path.Combine(outDir, "ses-birlesik.mp3"), "mp3", new Opt(null), _ => { }, ct, pause));
 
         Console.WriteLine("\nPDF:");

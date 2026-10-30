@@ -110,6 +110,7 @@ internal sealed partial class MainForm
                 BackColor = _edge; _web.DefaultBackgroundColor = _edge;
                 return true;
             case "window.flash": FlashWindow(); return true;
+            case "notify": ShowNotification(S(p, "title"), S(p, "text"), S(p, "path")); return true;
 
             // ---------- Güncelleme ----------
             case "update.check":
@@ -265,6 +266,28 @@ internal sealed partial class MainForm
             "pdf" => $"PDF|*.pdf|{all}|*.*",
             _ => $"{(TR ? "Desteklenen dosyalar" : "Supported files")}|{img};{vid};{aud};*.pdf|{(TR ? "Fotoğraflar" : "Images")}|{img}|{(TR ? "Videolar" : "Videos")}|{vid}|{(TR ? "Ses" : "Audio")}|{aud}|PDF|*.pdf|{all}|*.*",
         };
+    }
+
+    // Bitiş bildirimi: pencere öndeyse gösterilmez. Tıklanınca çıktıyı Gezgin'de gösterir.
+    NotifyIcon? _notify;
+    void ShowNotification(string title, string text, string path)
+    {
+        if (ContainsFocus && WindowState != FormWindowState.Minimized) return;
+        _notify?.Dispose();
+        var n = new NotifyIcon { Icon = AppIcon.Get(16), Text = GrapekitApp.Name, Visible = true };
+        n.BalloonTipClicked += (_, _) =>
+        {
+            if (path.Length > 0 && (File.Exists(path) || Directory.Exists(path))) Process.Start("explorer.exe", File.Exists(path) ? $"/select,\"{path}\"" : $"\"{path}\"");
+            else { if (WindowState == FormWindowState.Minimized) WindowState = FormWindowState.Normal; Activate(); }
+            n.Visible = false;
+        };
+        n.BalloonTipClosed += (_, _) => n.Visible = false;
+        n.ShowBalloonTip(8000, title, text, ToolTipIcon.Info);
+        _notify = n;
+        // Bildirim alanında simge kalmasın
+        var t = new System.Windows.Forms.Timer { Interval = 15000 };
+        t.Tick += (_, _) => { t.Dispose(); if (_notify == n) { n.Visible = false; n.Dispose(); _notify = null; } };
+        t.Start();
     }
 
     [System.Runtime.InteropServices.DllImport("user32.dll")] static extern bool FlashWindow(IntPtr h, bool invert);

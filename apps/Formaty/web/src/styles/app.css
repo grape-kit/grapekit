@@ -317,3 +317,15 @@ details.adv[open] > summary::before { transform: rotate(90deg); }
   #work { grid-template-columns: minmax(0, 1fr) 330px; }
   .files-tools .btn span { display: none; }
 }
+
+/* Hazır ayarlar, tahmin, kalan süre */
+.psec h3 .h3t { flex: 1; }
+.link-btn { display: inline-flex; align-items: center; gap: 5px; height: 28px; padding: 0 8px; border: 0; border-radius: 8px; background: transparent; color: var(--accent-text); font: 600 12.5px var(--font-ui); }
+.link-btn:hover { background: var(--hover); }
+.link-btn .ic { width: 15px; height: 15px; color: var(--accent-text); }
+.link-btn .ic:last-child { width: 13px; height: 13px; }
+.foot-est { display: flex; gap: 6px; align-items: center; margin: 0 0 9px; color: var(--ink-2); font-size: 12.5px; }
+.foot-est .ic { width: 15px; height: 15px; color: var(--muted); }
+.jtxt .eta { font-style: normal; color: var(--muted); }
+.menu-head { padding: 6px 10px 3px; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.field-l { display: block; font-weight: 600; font-size: 12.5px; color: var(--ink-2); margin: 4px 0 6px; }

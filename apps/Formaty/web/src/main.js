@@ -2,8 +2,8 @@
 import { call, on, hasHost } from './bridge.js';
 import { t, setLang, getLang, applyI18n } from './i18n.js';
 import { icon } from './icons.js';
-import { esc, h, toast, dialog, ask, showMenu, closeMenus } from './ui.js';
-import { TARGETS, target, groupsFor, DEFAULT_OPTS, buildRequest, outExt, QUICK, TOOLS } from './formats.js';
+import { esc, h, toast, dialog, ask, prompt, showMenu, closeMenus } from './ui.js';
+import { TARGETS, target, groupsFor, DEFAULT_OPTS, buildRequest, outExt, QUICK, TOOLS, BUILTIN_PRESETS } from './formats.js';
 import { settingsDialog } from './settings.js';
 import { startTour } from './tour.js';
 
@@ -348,7 +348,7 @@ function renderPanel() {
   const tg = target(app.targetId);
   box.innerHTML = `
     <section class="psec">
-      <h3>${icon('sparkles')}${esc(t('panel.target'))}</h3>
+      <h3>${icon('sparkles')}<span class="h3t">${esc(t('panel.target'))}</span><button type="button" class="link-btn" data-a="presets">${icon('bookmark')}<span>${esc(t('pre.title'))}</span>${icon('chevD')}</button></h3>
       ${gs.map((g) => `<div class="tgroup"><div class="tgroup-h">${esc(t('group.' + g))}</div><div class="chips">${TARGETS.filter((x) => x.group === g).map((x) => {
         const n = compatibleCount(x);
         return `<button type="button" class="chip${x.id === app.targetId ? ' on' : ''}${x.icon ? ' wide' : ''}" data-t="${x.id}" title="${esc(t(x.sub))}" aria-pressed="${x.id === app.targetId}"${n ? '' : ' disabled'}>
@@ -362,6 +362,7 @@ function renderPanel() {
       ${outputHtml(tg)}
     </section>`;
   box.scrollTop = scroll;
+  box.querySelector('[data-a="presets"]')?.addEventListener('click', (e) => presetMenu(e.currentTarget));
   for (const b of box.querySelectorAll('.chip[data-t]')) b.onclick = () => { applyTarget(b.dataset.t); resetResults(); renderList(); renderPanel(); renderFoot(); renderResult(); };
   wireOptions(box, tg);
   if (app.job) for (const x of box.querySelectorAll('button, input, select')) x.disabled = true;
@@ -465,6 +466,7 @@ function optionsHtml(tg) {
     s += `<details class="adv"><summary>${esc(t('o.more'))}</summary>`;
     s += row(t('o.normalize'), c.select('normalize', [[0, t('o.off')], [-14, '−14 LUFS (Spotify, YouTube)'], [-16, '−16 LUFS (Podcast)'], [-23, '−23 LUFS (TV)']]), t('o.normalizeD'));
     s += row(t('o.volume'), c.range('volumeDb', -12, 12, 1, ' dB'));
+    if (['mp3', 'aac', 'alac', 'flac'].includes(tg.id)) s += c.toggle('keepCover', t('o.keepCover'), t('o.keepCoverD'));
     s += c.toggle('trimSilence', t('o.trimSilence'), t('o.trimSilenceD'));
     s += trimRows(c);
     s += row(t('o.speed'), c.select('speed', [[0.5, '0.5×'], [0.75, '0.75×'], [1, '1×'], [1.25, '1.25×'], [1.5, '1.5×'], [2, '2×']]));
@@ -569,6 +571,110 @@ function wireOptions(box, tg) {
 }
 const openAdv = new Set();
 
+// ---------- Hazır ayarlar ----------
+function applyPreset(p) {
+  const tg = target(p.target); if (!tg) return;
+  // Yerleşik: grup varsayılanı + değişiklikler; kullanıcınınki: kaydedilen ayarların tamamı
+  S().opts[tg.group] = p.opts ? clone(p.opts) : merge(clone(DEFAULT_OPTS[tg.group]), clone(p.patch || {}));
+  applyTarget(p.target);
+  resetResults(); render();
+  toast(t('pre.applied', { name: p.opts ? p.name : t(p.name) }));
+}
+
+function presetMenu(anchor) {
+  const tg = target(app.targetId);
+  const usable = (p) => { const x = target(p.target); return x && app.files.some((f) => x.accepts.includes(f.kind)); };
+  const r = anchor.getBoundingClientRect();
+  const builtins = BUILTIN_PRESETS.filter(usable);
+  const mine = S().presets.filter(usable);
+  const items = [];
+  if (builtins.length) items.push({ header: t('pre.builtin') }, ...builtins.map((p) => ({ label: t(p.name), run: () => applyPreset(p) })));
+  if (mine.length) items.push('-', { header: t('pre.mine') }, ...mine.map((p) => ({ label: p.name, icon: 'bookmark', run: () => applyPreset(p) })));
+  if (items.length) items.push('-');
+  items.push({ label: t('pre.save'), icon: 'save', disabled: !tg || !!app.job, run: () => savePreset() });
+  if (S().presets.length) items.push({ label: t('pre.delete'), icon: 'trash', submenu: S().presets.map((p) => ({ label: p.name, run: () => { S().presets = S().presets.filter((x) => x !== p); saveSettings(); toast(t('pre.deleted', { name: p.name })); } })) });
+  showMenu(items, r.right, r.bottom + 4, { align: 'right', minWidth: 240 });
+}
+
+async function savePreset() {
+  const tg = target(app.targetId); if (!tg) return;
+  const name = (await prompt(t('pre.saveTitle'), { label: t('pre.nameL'), placeholder: t('pre.namePh', { fmt: t(tg.label) }) }))?.trim();
+  if (!name) return;
+  const existing = S().presets.findIndex((p) => p.name.toLocaleLowerCase() === name.toLocaleLowerCase());
+  const p = { name, target: tg.id, opts: clone(S().opts[tg.group]) };
+  if (existing >= 0) S().presets[existing] = p; else S().presets.push(p);
+  saveSettings();
+  toast(t('pre.saved', { name }));
+}
+
+// ---------- Tahmini çıktı boyutu ----------
+const MB = 1024 * 1024;
+const LV = { small: 0, balanced: 1, high: 2, max: 3 };
+/** Hedef ve ayarlara göre yaklaşık toplam çıktı (bayt); hesaplanamıyorsa null. */
+function estimate(tg, o, files) {
+  if (!tg || !files.length) return null;
+  let total = 0;
+  for (const f of files) {
+    const i = f.info;
+    if (!i) return null;
+    if (tg.group === 'image') {
+      if (o.targetKb > 0 && ['jpg', 'webp', 'avif'].includes(tg.id)) { total += o.targetKb * 1024; continue; }
+      return null;
+    }
+    const end = o.end > 0 && o.end < (i.duration || 0) ? o.end : i.duration || 0;
+    const d0 = Math.max(0, end - (o.start || 0)) / (o.speed || 1);
+    if (!(d0 > 0)) return null;
+    if (tg.group === 'video') {
+      if (['vid-gif', 'vid-webp', 'frames'].includes(tg.id)) return null;
+      if (o.targetMb > 0) { total += o.targetMb * MB; continue; }
+      const short = Math.min(i.width || 1280, i.height || 720), long = Math.max(i.width || 1280, i.height || 720);
+      const outShort = o.height > 0 && o.height < short ? o.height : short;
+      const px = outShort * Math.round(long * outShort / short);
+      const fps = o.fps > 0 && (!i.fps || o.fps < i.fps) ? o.fps : i.fps || 30;
+      const codec = o.vcodec === 'auto' ? (tg.id === 'webm' ? 'vp9' : tg.id === 'avi' ? 'mpeg4' : 'h264') : o.vcodec;
+      const factor = { h264: 1, hevc: 0.65, av1: 0.55, vp9: 0.7, mpeg4: 1.6 }[codec] || 1;
+      const bpp = [0.05, 0.08, 0.12, 0.2][LV[o.quality] ?? 1];
+      let kbps = (px * fps * bpp * factor) / 1000;
+      if (o.audio !== 'remove' && i.hasAudio) kbps += [96, 128, 192, 256][LV[o.quality] ?? 1];
+      total += (kbps * 1000 / 8) * d0;
+      continue;
+    }
+    if (tg.group === 'audio') {
+      if (!i.hasAudio) return null;
+      const ch = o.channels === 'mono' ? 1 : o.channels === 'stereo' ? 2 : i.channels || 2;
+      const sr = o.sampleRate || i.sampleRate || 44100;
+      if (['wav', 'aiff', 'flac', 'alac'].includes(tg.id)) {
+        const bits = o.bits || 16;
+        const raw = sr * ch * bits / 8 * d0;
+        total += tg.id === 'flac' || tg.id === 'alac' ? raw * 0.6 : raw;
+        continue;
+      }
+      const lv = LV[o.quality] ?? 2;
+      let kbps = o.kbps > 0 ? o.kbps : ({ mp3: [96, 160, 256, 320], aac: [96, 160, 224, 320], opus: [64, 112, 160, 256], ogg: [112, 160, 224, 320] }[tg.id] || [96, 160, 224, 320])[lv];
+      if (tg.id === 'mp3' && o.mode === 'vbr') kbps = [245, 225, 190, 175, 165, 130, 115, 100, 85, 65][o.vbr ?? 2];
+      total += kbps * 1000 / 8 * d0;
+      continue;
+    }
+    return null;
+  }
+  return total;
+}
+
+/** Tahmin için gereken dosya bilgilerini (henüz yüklenmemişse) arka planda ister. */
+function ensureMeta(files) {
+  for (const f of files.slice(0, 400)) if (!f.info && !f.metaLoading) loadMeta(f).then(() => throttleFoot());
+}
+
+function etaText(j) {
+  const p = jobProgress();
+  const el = (Date.now() - j.started - (j.pausedMs || 0)) / 1000;
+  if (j.paused || p < 0.02 || el < 2) return '';
+  const left = el * (1 - p) / p;
+  j.eta = j.eta ? j.eta * 0.7 + left * 0.3 : left; // sıçramasın
+  const sec = Math.round(j.eta);
+  return sec < 60 ? t('eta.sec', { n: Math.max(1, sec) }) : sec < 3600 ? t('eta.min', { n: Math.round(sec / 60) }) : t('eta.hour', { h: Math.floor(sec / 3600), m: Math.round((sec % 3600) / 60) });
+}
+
 // ---------- Alt çubuk: başlat / duraklat / iptal ----------
 function renderFoot() {
   const foot = $('#work .panel-foot');
@@ -579,17 +685,26 @@ function renderFoot() {
   const j = app.job;
   if (j) {
     const pct = Math.round(jobProgress() * 100);
-    foot.innerHTML = `<div class="jprog"><div class="jbar"><i style="width:${pct}%"></i></div><div class="jtxt"><b>${pct}%</b><span>${esc(t(j.paused ? 'job.paused' : 'job.running', { done: j.finished, total: j.total }))}</span></div></div>
+    foot.innerHTML = `<div class="jprog"><div class="jbar"><i style="width:${pct}%"></i></div><div class="jtxt"><b>${pct}%</b><span>${esc(t(j.paused ? 'job.paused' : 'job.running', { done: j.finished, total: j.total }))}</span><em class="eta">${esc(etaText(j))}</em></div></div>
       <div class="foot-btns"><button type="button" class="btn" data-a="pause">${icon(j.paused ? 'play' : 'pause')}${esc(t(j.paused ? 'job.resume' : 'job.pause'))}</button>
       <button type="button" class="btn btn-danger" data-a="cancel">${icon('x')}${esc(t('job.cancel'))}</button></div>`;
-    foot.querySelector('[data-a="pause"]').onclick = () => { j.paused = !j.paused; call('job.pause', { id: j.id, paused: j.paused }); renderFoot(); };
+    foot.querySelector('[data-a="pause"]').onclick = () => {
+      j.paused = !j.paused;
+      if (j.paused) j.pausedAt = Date.now(); else { j.pausedMs = (j.pausedMs || 0) + (Date.now() - (j.pausedAt || Date.now())); j.eta = 0; }
+      call('job.pause', { id: j.id, paused: j.paused }); renderFoot();
+    };
     foot.querySelector('[data-a="cancel"]').onclick = () => call('job.cancel', { id: j.id });
     return;
   }
   const combine = tg && (tg.id === 'pdf-merge' || (tg.id === 'img-pdf' && S().opts.image.combinePdf) || ((tg.group === 'video' || tg.group === 'audio') && S().opts[tg.group]?.combine && tg.id !== 'frames' && tg.id !== 'vid-gif' && tg.id !== 'vid-webp'));
   const extLabel = tg ? (tg.group === 'pdf' || tg.id === 'frames' ? outExt(tg, S().opts[tg.group]).toUpperCase() : t(tg.label)) : '';
   const label = !tg ? t('job.pickTarget') : combine ? t('job.startCombine', { n, ext: extLabel }) : t('job.start', { n, ext: extLabel });
-  foot.innerHTML = `${skip > 0 && tg ? `<p class="foot-note">${icon('info')}${esc(t('job.skipNote', { n: skip }))}</p>` : ''}
+  const files = tg ? app.files.filter((f) => accepts(tg, f)) : [];
+  ensureMeta(files);
+  const est = tg ? estimate(tg, S().opts[tg.group], files) : null;
+  const inSize = files.reduce((a, f) => a + (f.size || 0), 0);
+  const estHtml = est != null ? `<p class="foot-est">${icon('info')}<span>${esc(t(tg.group === 'image' ? 'est.max' : 'est.size', { out: size(est), in: size(inSize) }))}</span></p>` : '';
+  foot.innerHTML = `${estHtml}${skip > 0 && tg ? `<p class="foot-note">${icon('info')}${esc(t('job.skipNote', { n: skip }))}</p>` : ''}
     <button type="button" class="btn btn-go" data-a="start"${n && !(combine && n < 2 && tg.id === 'pdf-merge') ? '' : ' disabled'}>${icon('arrowR')}<span>${esc(label)}</span><kbd>Ctrl+Enter</kbd></button>`;
   foot.querySelector('[data-a="start"]').onclick = () => startJob();
 }
@@ -687,7 +802,15 @@ function onDone(d) {
     for (const id of j.map) { const f = app.files.find((x) => x.id === id); if (f) { f.status = 'done'; f.out = d.outputs[0]; f.outSize = 0; f.count = 1; } }
   }
   renderWork();
-  if (S().notify && !d.cancelled) call('window.flash', {});
+  if (S().notify && !d.cancelled && (d.done || d.failed)) {
+    call('window.flash', {});
+    const saved = d.inBytes > 0 && d.outBytes > 0 ? ` · ${size(d.inBytes)} → ${size(d.outBytes)}` : '';
+    call('notify', {
+      title: d.failed ? t('notify.partial') : t('notify.done'),
+      text: (d.failed ? t('res.partial', { n: d.done, f: d.failed }) : j.combine ? t('res.combined', { n: d.done }) : t('res.done', { n: d.done })) + saved,
+      path: d.outputs?.[0] || '',
+    });
+  }
 }
 
 // ===================== Gezgin hızlı işlemleri =====================
