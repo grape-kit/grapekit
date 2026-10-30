@@ -1,4 +1,9 @@
 {
+  "1.0.2": {
+    "tr": "Yeni sürüm çıktığında ayarlar simgesinde, Hakkında sekmesinde ve Güncellemeler satırında kırmızı rozet görünür; güncelleme uygulama açılışında da denetlenir.",
+    "en": "When a new version is out, a red badge appears on the settings icon, the About tab and the Updates row; updates are also checked when the app starts.",
+    "de": "When a new version is out, a red badge appears on the settings icon, the About tab and the Updates row; updates are also checked when the app starts."
+  },
   "1.0.1": {
     "tr": "Hedef boyut seçildiğinde zaten küçük olan videolar büyütülmez; AMD ekran kartlarında video kalitesi ve boyutu dengelendi; dosya boyutları daha okunaklı gösterilir.",
     "en": "Videos that are already under the target size are no longer enlarged; balanced video quality and size on AMD graphics cards; clearer file size display.",

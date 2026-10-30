@@ -3,7 +3,7 @@ import { call } from './bridge.js';
 import { t, getLang } from './i18n.js';
 import { icon } from './icons.js';
 import { esc, dialog } from './ui.js';
-import { app, applySetting, saveSettings } from './main.js';
+import { app, applySetting, saveSettings, updateBadges } from './main.js';
 
 const SECTIONS = ['general', 'convert', 'about'];
 
@@ -28,14 +28,13 @@ export function settingsDialog(start = 'general') {
       + `<div class="set-row col"><div><b>${esc(t('set.hwList'))}</b><small id="s-hwlist">${esc(t('set.hwChecking'))}</small></div></div>`
       + row(t('set.reset'), t('set.resetD'), `<button type="button" class="btn btn-sm" id="s-reset">${esc(t('set.resetBtn'))}</button>`);
     return `<div class="about"><img src="icon.png" width="72" height="72" alt=""><div><h3>Formaty</h3><p>${esc(t('about.version', { v: app.info.version || '' }))}</p><p class="muted">${esc(t('about.lead'))}</p></div></div>`
-      + (app.info.packaged ? '' : `<div class="set-row"><div><b>${esc(t('set.updates'))}</b><small id="u-status">${esc(app.info.updateStatus || '')}</small></div><button type="button" class="btn btn-sm" id="u-check">${esc(app.info.updateAvailable ? app.info.updateLabel : t('set.checkUpdates'))}</button></div>`)
+      + (app.info.packaged ? '' : `<div class="set-row upd-row${app.info.updateAvailable ? ' has-update' : ''}"><div><b>${esc(t('set.updates'))}${app.info.updateAvailable ? '<span class="upd-badge inline">1</span>' : ''}</b><small id="u-status">${esc(app.info.updateStatus || '')}</small></div><button type="button" class="btn btn-sm${app.info.updateAvailable ? ' btn-primary' : ''}" id="u-check">${esc(app.info.updateAvailable ? app.info.updateLabel : t('set.checkUpdates'))}</button></div>`)
       + `<div class="about-links">
           <button type="button" class="btn btn-sm" data-url="page">${icon('external')}${esc(t('about.site'))}</button>
           <button type="button" class="btn btn-sm" data-url="feedback">${icon('help')}${esc(t('about.feedback'))}</button>
           <button type="button" class="btn btn-sm" data-url="coffee">${icon('coffee')}${esc(t('about.coffee'))}</button>
           <button type="button" class="btn btn-sm" id="s-licenses">${icon('file')}${esc(t('about.licenses'))}</button>
-        </div>
-        <p class="muted small">${esc(t('about.engines'))}</p>`;
+        </div>`;
   }
 
   return dialog({
@@ -77,12 +76,16 @@ export function settingsDialog(start = 'general') {
           uc.disabled = true;
           Object.assign(app.info, (await call('update.check', {})) || {});
           b.querySelector('#u-status').textContent = app.info.updateStatus || '';
-          uc.textContent = app.info.updateAvailable ? app.info.updateLabel : t('set.checkUpdates');
           uc.disabled = false;
+          updateBadges();
         };
       };
       for (const n of el.querySelectorAll('.set-nav button')) n.onclick = () => { sec = n.dataset.s; draw(); };
+      // Pencere açıkken durum değişirse (yeni sürüm bulundu, indirme yüzdesi) Hakkında bölümünü tazele
+      const onUpd = () => { if (!el.isConnected) { window.removeEventListener('formaty-update', onUpd); return; } if (sec === 'about') draw(); };
+      window.addEventListener('formaty-update', onUpd);
       draw();
+      updateBadges();
     },
   });
 }

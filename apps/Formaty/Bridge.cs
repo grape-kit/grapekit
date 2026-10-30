@@ -299,13 +299,16 @@ internal sealed partial class MainForm
     void StartUpdates()
     {
         if (!Updater.Supported) return;
+        static DateTime Last() { try { return DateTime.Parse(File.ReadAllText(UpdateStamp), null, System.Globalization.DateTimeStyles.RoundtripKind); } catch { return default; } }
         _updates = new UpdateManager(
-            () => { try { return DateTime.Parse(File.ReadAllText(UpdateStamp), null, System.Globalization.DateTimeStyles.RoundtripKind); } catch { return default; } },
+            Last,
             d => { try { Store.WriteAtomic(UpdateStamp, d.ToString("o")); } catch { } },
             () => Store.Bool("autoUpdate", true));
         _updates.Changed += () => Emit("update-status", UpdateInfo(false));
         _updates.Progress += () => Emit("update-status", UpdateInfo(false));
         _updates.Found += _ => Emit("update-status", UpdateInfo(true));
+        // Açılışta da denetle (son denetim 6 saatten eskiyse): yeni sürüm ayarlar simgesindeki rozetle hemen görünsün
+        if (Store.Bool("autoUpdate", true) && (DateTime.UtcNow - Last()).TotalHours >= 6) _ = _updates.CheckAsync(manual: false);
     }
 
     JsonObject UpdateInfo(bool notify) => new()

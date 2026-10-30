@@ -174,7 +174,6 @@ const S = {
   'about.version': ['Sürüm {v}', 'Version {v}'], 'about.lead': ['Fotoğraf, video, ses ve PDF dönüştürücü. Ücretsiz, reklamsız, internetsiz çalışır.', 'Image, video, audio and PDF converter. Free, no ads, works offline.'],
   'about.site': ['Uygulama sayfası', 'App page'], 'about.feedback': ['Hata bildir / öneri', 'Report a bug / idea'], 'about.coffee': ['Bir kahve ısmarla', 'Buy me a coffee'],
   'about.licenses': ['Açık kaynak lisansları', 'Open-source licenses'],
-  'about.engines': ['Dönüştürme motorları: FFmpeg (LGPL), libvips (LGPL), PDFium (BSD), PDFsharp (MIT).', 'Engines: FFmpeg (LGPL), libvips (LGPL), PDFium (BSD), PDFsharp (MIT).'],
 
   // Hazır ayarlar, tahmin, bildirim
   'pre.title': ['Hazır ayarlar', 'Presets'], 'pre.builtin': ['Hazır', 'Built-in'], 'pre.mine': ['Benim ayarlarım', 'My presets'],

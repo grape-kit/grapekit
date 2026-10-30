@@ -55,6 +55,17 @@ function parseTime(v) {
 const baseName = (p) => p.split(/[\\/]/).pop();
 const dirOf = (p) => p.replace(/[\\/][^\\/]*$/, '');
 
+/** Yeni sürüm varsa ayarlar simgesinde (ve açıksa ayarlar penceresinde) kırmızı "1" rozeti. */
+export function updateBadges() {
+  for (const el of document.querySelectorAll('.tb-settings, .set-nav [data-s="about"]')) {
+    let b = el.querySelector('.upd-badge');
+    if (app.info.updateAvailable && !b) { b = document.createElement('span'); b.className = 'upd-badge'; b.textContent = '1'; el.append(b); }
+    if (!app.info.updateAvailable) b?.remove();
+    if (b) b.title = app.info.updateLabel || '';
+  }
+  window.dispatchEvent(new CustomEvent('formaty-update'));
+}
+
 // ===================== Tema ve dil =====================
 function applyTheme() {
   const m = S().theme;
@@ -848,7 +859,7 @@ function buildChrome() {
   $('.tb-nav').innerHTML = `<button type="button" data-view="home">${icon('home')}<span>${esc(t('nav.home'))}</span></button>
     <button type="button" data-view="work">${icon('sliders')}<span>${esc(t('nav.work'))}</span><span class="count"></span></button>`;
   for (const b of document.querySelectorAll('.tb-nav button')) b.onclick = () => { if (!b.disabled) { showView(b.dataset.view); render(); } };
-  $('.tb-settings').onclick = () => settingsDialog();
+  $('.tb-settings').onclick = () => settingsDialog(app.info.updateAvailable ? 'about' : 'general');
   $('.tb-settings').title = t('nav.settings');
   $('.tb-settings').setAttribute('aria-label', t('nav.settings'));
   $('[data-win="close"]').onclick = () => requestClose();
@@ -915,14 +926,14 @@ async function boot() {
   on('job-error', (d) => toast(d.message, { kind: 'error', timeout: 8000 }));
   on('close-request', () => requestClose());
   on('theme-changed', (d) => { app.info.dark = d.dark; if (S().theme === 'system') applyTheme(); });
-  on('update-status', (d) => { Object.assign(app.info, d); if (d.notify && d.updateLabel) toast(d.updateLabel, { actions: [{ label: t('upd.install'), run: () => call('update.install', {}) }], timeout: 15000 }); });
+  on('update-status', (d) => { Object.assign(app.info, d); updateBadges(); if (d.notify && d.updateLabel) toast(d.updateLabel, { actions: [{ label: t('upd.install'), run: () => call('update.install', {}) }], timeout: 15000 }); });
   if (!app.info.engines && hasHost) toast(t('err.engines'), { kind: 'error', timeout: 0 });
   showView('home');
   render();
   document.body.classList.add('ready');
   call('app.ready', {});
   if (app.info.args?.length) quick(app.info.args, app.info.action);
-  if (app.info.debug) window.__fmt = { app, call, render, startJob, addPaths, applyTarget, quick, settingsDialog, runTour, showView };
+  if (app.info.debug) window.__fmt = { app, call, render, startJob, addPaths, applyTarget, quick, settingsDialog, runTour, showView, updateBadges };
 }
 
 boot().catch((e) => { console.error(e); document.body.classList.add('ready'); toast(String(e.message || e), { kind: 'error', timeout: 0 }); });
