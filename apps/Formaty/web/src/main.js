@@ -39,7 +39,7 @@ const nf = () => new Intl.NumberFormat(getLang() === 'en' ? 'en-US' : 'tr-TR', {
 export function size(b) {
   if (b == null || b < 0) return '';
   const u = ['B', 'KB', 'MB', 'GB', 'TB']; let i = 0; let v = b;
-  while (v >= 1024 && i < u.length - 1) { v /= 1024; i++; }
+  while (v >= 1000 && i < u.length - 1) { v /= 1024; i++; } // "1.001 KB" yerine "1 MB"
   return `${nf().format(i === 0 ? v : v < 10 ? Math.round(v * 10) / 10 : Math.round(v))} ${u[i]}`;
 }
 function dur(s) {
@@ -626,7 +626,7 @@ function estimate(tg, o, files) {
     if (!(d0 > 0)) return null;
     if (tg.group === 'video') {
       if (['vid-gif', 'vid-webp', 'frames'].includes(tg.id)) return null;
-      if (o.targetMb > 0) { total += o.targetMb * MB; continue; }
+      if (o.targetMb > 0) { total += Math.min(o.targetMb * MB, (f.size || Infinity) * Math.min(1, d0 * (o.speed || 1) / (i.duration || d0))); continue; } // hedef üst sınırdır
       const short = Math.min(i.width || 1280, i.height || 720), long = Math.max(i.width || 1280, i.height || 720);
       const outShort = o.height > 0 && o.height < short ? o.height : short;
       const px = outShort * Math.round(long * outShort / short);

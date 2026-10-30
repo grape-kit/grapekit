@@ -1,4 +1,4 @@
-namespace Formaty.Engines;
+﻿namespace Formaty.Engines;
 
 /// <summary>
 /// Video ve ses dönüştürme: hedef biçim + seçeneklerden FFmpeg komutu kurar.
@@ -12,7 +12,7 @@ public static class Media
     static int Level(string q) => q switch { "small" => 0, "high" => 2, "max" => 3, _ => 1 };
 
     // ---------------- Video ----------------
-    public static async Task ConvertVideoAsync(string src, string dst, string fmt, Opt o, Ffmpeg.MediaInfo info, Action<double> progress, CancellationToken ct, PauseToken pause)
+    public static async Task ConvertVideoAsync(string src, string dst, string fmt, Opt o, Ffmpeg.MediaInfo info, Action<double> progress, CancellationToken ct, PauseToken pause, bool forceTarget = false)
     {
         var args = new List<string>();
         var (ss, to) = Trim(o, info);
@@ -56,6 +56,7 @@ public static class Media
         }
         if (speed != 1) vf.Add($"setpts=PTS/{Ffmpeg.F(speed)}");
 
+        bool targetMode = false;
         if (codec == "copy")
         {
             args.AddRange(["-c:v", "copy"]);
@@ -71,8 +72,9 @@ public static class Media
             double outFps = fps > 0 ? fps : (info.Fps > 0 ? info.Fps : 30);
             double targetMb = o.N("targetMb", 0);
             int aKbps = audio ? AudioKbpsForVideo(fmt, o) : 0;
-            if (targetMb > 0)
+            if (targetMb > 0 && (forceTarget || !SourceFits(src, info, dur * speed, targetMb)))
             {
+                targetMode = true;
                 // Hedef boyut: kapsayıcı payı için %3 ayır
                 var total = targetMb * 8 * 1024 * 1024 * 0.97 / dur / 1000; // kbps
                 var vk = Math.Max(80, (int)(total - aKbps));
@@ -107,6 +109,15 @@ public static class Media
         args.Add(dst);
         double target = o.N("targetMb", 0) * 1024 * 1024;
         if (target <= 0) { await Ffmpeg.RunAsync(args, dur, progress, ct, pause); return; }
+        if (!targetMode && codec != "copy")
+        {
+            // Kaynak zaten sınırın altında: hedef bit hızıyla şişirmek yerine kalite ayarıyla kodla; yine aşarsa hedefe göre yeniden kodla
+            await Ffmpeg.RunAsync(args, dur, p => progress(p * 0.5), ct, pause);
+            if (new FileInfo(dst).Length > target * 1.02)
+                await ConvertVideoAsync(src, dst, fmt, o, info, p => progress(0.5 + p * 0.5), ct, pause, forceTarget: true);
+            progress(1);
+            return;
+        }
         // Hedef boyut: kodlayıcılar bit hızını tam tutturamaz; aşılırsa oranla düşürüp bir kez daha dene
         await Ffmpeg.RunAsync(args, dur, p => progress(p * 0.5), ct, pause);
         long got = new FileInfo(dst).Length;
@@ -126,6 +137,13 @@ public static class Media
         progress(1);
     }
 
+    /// <summary>Kaynağın (kırpılan kısmıyla) zaten hedef boyuttan küçük olup olmadığı.</summary>
+    static bool SourceFits(string src, Ffmpeg.MediaInfo info, double seconds, double targetMb)
+    {
+        double part = info.Duration > 0 ? Math.Min(1, seconds / info.Duration) : 1;
+        return new FileInfo(src).Length * part <= targetMb * 1024 * 1024;
+    }
+
     static int AudioKbpsForVideo(string fmt, Opt o) => o.I("audioKbps", 0) is > 0 and var k ? k : Level(o.S("quality", "balanced")) switch { 0 => 96, 1 => 128, 2 => 192, _ => 256 };
 
     static void QualityArgs(List<string> a, string enc, int lv, int w, int h, double fps)
@@ -137,7 +155,12 @@ public static class Media
             case var e when e.EndsWith("_qsv"):
                 a.AddRange(["-preset", "medium", "-global_quality", new[] { "30", "25", "21", "18" }[lv]]); break;
             case var e when e.EndsWith("_amf"):
-                a.AddRange(["-quality", "quality", "-rc", "cqp", "-qp_i", new[] { "30", "25", "21", "17" }[lv], "-qp_p", new[] { "32", "27", "23", "19" }[lv]]); break;
+            {
+                // Sabit QP ayrıntılı görüntüde kaynaktan büyük dosya verebiliyor; piksel başına bit hesabıyla tepe sınırlı VBR (tahminle aynı ölçü)
+                double factor = e.StartsWith("av1") ? 0.55 : e.StartsWith("hevc") ? 0.65 : 1;
+                int k = Math.Max(300, (int)(w * h * fps * new[] { 0.05, 0.08, 0.12, 0.2 }[lv] * factor / 1000));
+                a.AddRange(["-quality", "quality", "-rc", "vbr_peak", "-b:v", k + "k", "-maxrate", (int)(k * 1.5) + "k", "-bufsize", k * 2 + "k"]); break;
+            }
             case var e when e.EndsWith("_mf"):
                 a.AddRange(["-rate_control", "quality", "-quality", new[] { "35", "55", "75", "90" }[lv], "-hw_encoding", "1"]); break;
             case "libvpx-vp9":

@@ -1,4 +1,9 @@
 {
+  "1.0.1": {
+    "tr": "Hedef boyut seçildiğinde zaten küçük olan videolar büyütülmez; AMD ekran kartlarında video kalitesi ve boyutu dengelendi; dosya boyutları daha okunaklı gösterilir.",
+    "en": "Videos that are already under the target size are no longer enlarged; balanced video quality and size on AMD graphics cards; clearer file size display.",
+    "de": "Videos that are already under the target size are no longer enlarged; balanced video quality and size on AMD graphics cards; clearer file size display."
+  },
   "1.0.0": {
     "tr": "İlk sürüm: fotoğraf (HEIC dahil), video, ses ve PDF dönüştürme; toplu işlem, hedef boyuta sıkıştırma, videodan ses çıkarma, GIF yapma, PDF birleştirme, bölme ve şifreleme, ekran kartı hızlandırma, hazır ayarlar, tahmini çıktı boyutu ve Gezgin sağ tık menüsü.",
     "en": "First release: image (including HEIC), video, audio and PDF conversion; batch processing, compress to a target size, extract audio from video, make GIFs, merge, split and protect PDFs, GPU acceleration, presets, estimated output size and an Explorer right-click menu.",

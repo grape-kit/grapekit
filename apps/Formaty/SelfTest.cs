@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Text.Json.Nodes;
 using Formaty.Engines;
 
@@ -90,6 +90,12 @@ internal static class SelfTest
             var dst = Path.Combine(outDir, "video-1mb.mp4");
             await Media.ConvertVideoAsync(video, dst, "mp4", new Opt(new JsonObject { ["targetMb"] = 1 }), vi, _ => { }, ct, pause);
             if (size(dst) > 1.15 * 1024 * 1024) throw new Exception($"boyut {size(dst) / 1024} KB");
+        });
+        check("hedef kaynaktan büyükse şişirmez", async () =>
+        {
+            var dst = Path.Combine(outDir, "video-50mb.mp4");
+            await Media.ConvertVideoAsync(video, dst, "mp4", new Opt(new JsonObject { ["targetMb"] = 50 }), vi, _ => { }, ct, pause);
+            if (size(dst) > Math.Max(new FileInfo(video).Length * 2, 512 * 1024)) throw new Exception($"boyut {size(dst) / 1024} KB, kaynak {new FileInfo(video).Length / 1024} KB");
         });
         check("kırpma 1–3 sn, sessiz, 2x", () => Media.ConvertVideoAsync(video, Path.Combine(outDir, "video-kirp.mp4"), "mp4",
             new Opt(new JsonObject { ["start"] = 1, ["end"] = 3, ["audio"] = "remove", ["speed"] = 2 }), vi, _ => { }, ct, pause));
