@@ -74,6 +74,11 @@ public static class Images
             return rot ? (im.Height, im.Width, pages) : (im.Width, im.Height, pages);
         }
         if (Formats.GdiImage.Contains(ext)) { using var im = FromGdi(path); return (im.Width, im.Height, 1); }
+        if (Formats.Heic.Contains(ext))
+        {
+            // Yalnızca başlık okunur (çözme yok): karolu HEIC'in gerçek boyutu
+            try { using var im = Img.NewFromFile(path, access: Enums.Access.Sequential); return (im.Width, im.Height, 1); } catch { }
+        }
         return (0, 0, 1);
     }
 

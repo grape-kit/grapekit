@@ -62,6 +62,18 @@ internal static class SelfTest
             var s = Path.Combine(outDir, "foto." + f);
             if (File.Exists(s)) check($"{f} → png (geri okuma)", () => Images.ConvertAsync(s, Path.Combine(outDir, $"geri-{f}.png"), "png", new Opt(null), temp, ct));
         }
+        foreach (var heic in Directory.GetFiles(dir, "*.heic"))
+        {
+            var name = Path.GetFileNameWithoutExtension(heic);
+            check($"heic ({name}) → jpg", async () =>
+            {
+                var dst = Path.Combine(outDir, name + ".jpg");
+                await Images.ConvertAsync(heic, dst, "jpg", new Opt(null), temp, ct);
+                var (w, h, _) = Images.Header(heic);
+                using var o = NetVips.Image.NewFromFile(dst);
+                if (Math.Max(o.Width, o.Height) != Math.Max(w, h)) throw new Exception($"boyut {o.Width}x{o.Height}, beklenen {w}x{h}");
+            });
+        }
         check("filigran + 90° + kırpma", () => Images.ConvertAsync(photo, Path.Combine(outDir, "filigran.jpg"), "jpg",
             new Opt(new JsonObject { ["rotate"] = "90", ["watermark"] = new JsonObject { ["text"] = "Formaty" }, ["resize"] = new JsonObject { ["mode"] = "exact", ["width"] = 800, ["height"] = 800 } }), temp, ct));
 
