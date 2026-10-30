@@ -1,22 +1,22 @@
 {
-  "version": "1.0.0",
-  "tag": "formaty-v1.0.0",
+  "version": "1.0.1",
+  "tag": "formaty-v1.0.1",
   "date": "2026-10-30",
   "notes": {
-    "tr": "İlk sürüm: fotoğraf (HEIC dahil), video, ses ve PDF dönüştürme; toplu işlem, hedef boyuta sıkıştırma, videodan ses çıkarma, GIF yapma, PDF birleştirme, bölme ve şifreleme, ekran kartı hızlandırma, hazır ayarlar, tahmini çıktı boyutu ve Gezgin sağ tık menüsü.",
-    "en": "First release: image (including HEIC), video, audio and PDF conversion; batch processing, compress to a target size, extract audio from video, make GIFs, merge, split and protect PDFs, GPU acceleration, presets, estimated output size and an Explorer right-click menu.",
-    "de": "First release: image (including HEIC), video, audio and PDF conversion; batch processing, compress to a target size, extract audio from video, make GIFs, merge, split and protect PDFs, GPU acceleration, presets, estimated output size and an Explorer right-click menu."
+    "tr": "Hedef boyut seçildiğinde zaten küçük olan videolar büyütülmez; AMD ekran kartlarında video kalitesi ve boyutu dengelendi; dosya boyutları daha okunaklı gösterilir.",
+    "en": "Videos that are already under the target size are no longer enlarged; balanced video quality and size on AMD graphics cards; clearer file size display.",
+    "de": "Videos that are already under the target size are no longer enlarged; balanced video quality and size on AMD graphics cards; clearer file size display."
   },
   "files": {
     "x64": {
-      "url": "https://github.com/grape-kit/grapekit/releases/download/formaty-v1.0.0/Formaty-Setup-1.0.0-x64.exe",
-      "sha256": "E7A7CB47B65AA4F69757CC8340E2E247AEB40BF693637AABC1DAD932F1C6D132",
-      "size": 94593358
+      "url": "https://github.com/grape-kit/grapekit/releases/download/formaty-v1.0.1/Formaty-Setup-1.0.1-x64.exe",
+      "sha256": "E098A9FAEFE8F2947C65388BB2D6D64997549CD610C52BE0323AA25628D1860F",
+      "size": 94583543
     },
     "arm64": {
-      "url": "https://github.com/grape-kit/grapekit/releases/download/formaty-v1.0.0/Formaty-Setup-1.0.0-arm64.exe",
-      "sha256": "4FBAEEB99FB24DA563AE3E92E156D4E6F74EDEC3886D1B0ADB7253B2E9A504C7",
-      "size": 75632372
+      "url": "https://github.com/grape-kit/grapekit/releases/download/formaty-v1.0.1/Formaty-Setup-1.0.1-arm64.exe",
+      "sha256": "5AB4257EE9E3B347DD604C34FB5C1494F76BC33D2F4D054460291A7A3D1698F6",
+      "size": 75633991
     }
   }
 }
