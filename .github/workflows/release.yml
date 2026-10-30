@@ -55,6 +55,8 @@ jobs:
           $u = Get-Content "dist/$id/update.json" -Raw -Encoding UTF8 | ConvertFrom-Json
           $app = Get-ChildItem apps -Directory | Where-Object { (Test-Path "$($_.FullName)/app.json") -and ((Get-Content "$($_.FullName)/app.json" -Raw -Encoding UTF8 | ConvertFrom-Json).id -eq $id) } | Select-Object -First 1
           $meta = Get-Content "$($app.FullName)/app.json" -Raw -Encoding UTF8 | ConvertFrom-Json
+          $label = @{ x64 = 'Windows 10 / 11, x64'; arm64 = 'Windows 11 ARM'; x86 = '32-bit Windows' }
+          $rows = ($meta.archs | Where-Object { Test-Path "dist/$id/$($meta.exe)-Setup-$ver-$_.exe" } | ForEach-Object { "| $($label[$_]) | ``$($meta.exe)-Setup-$ver-$_.exe`` |" }) -join "`n"
           $body = @"
           ## $($meta.name.en) $ver
 
@@ -64,9 +66,7 @@ jobs:
 
           | | |
           |---|---|
-          | Windows 10 / 11, x64 | ``$($meta.exe)-Setup-$ver-x64.exe`` |
-          | Windows 11 ARM | ``$($meta.exe)-Setup-$ver-arm64.exe`` |
-          | 32-bit Windows | ``$($meta.exe)-Setup-$ver-x86.exe`` |
+          $rows
 
           🍇 https://grapekit.com · ☕ https://buymeacoffee.com/grapekit
           "@
